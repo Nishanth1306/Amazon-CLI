@@ -1,9 +1,11 @@
 import { Pressable, StyleSheet, Text, Image, View } from "react-native";
-import React, { useState } from "react";
+import React, { useState,useContext } from "react";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/CartReducer";
+import { UserType } from "../UserContext";
 
 const ProductItem = ({ item }) => {
+  const { userId, setUserId } = useContext(UserType);
   const [addedToCart, setAddedToCart] = useState(false);
   const dispatch = useDispatch();
   const addItemToCart = (item) => {
@@ -37,7 +39,7 @@ const ProductItem = ({ item }) => {
 
       <Pressable
         onPress={() => {
-          if (userType === "guest") {
+          if (userId === "guest") {
             Alert.alert(
               "Guest Access",
               "You need to log in to add items to your cart.",
