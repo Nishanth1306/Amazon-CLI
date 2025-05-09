@@ -1,0 +1,224 @@
+  <SafeAreaView style={styles.container}>
+        <ScrollView>
+          <View style={styles.searchBar}>
+            <Pressable style={styles.searchInput}>
+              <AntDesign name="search1" size={24} color="black" />
+              <TextInput placeholder="Search" style={styles.input} />
+            </Pressable>
+            <Entypo name="mic" size={24} color="black" />
+          </View>
+
+          <Pressable
+            style={styles.locationBar}
+            onPress={() => setModalVisible(!modalVisible)}
+          >
+            <Entypo name="location-pin" size={24} color="black" />
+
+            <Pressable>
+              {selectedAddress ? (
+                <Text>
+                  Delivery To {selectedAddress?.name} -{" "}
+                  {selectedAddress?.street}
+                </Text>
+              ) : (
+                <Text style={{ fontSize: 13, fontWeight: "500" }}>
+                  {" "}
+                  Add a Address
+                </Text>
+              )}
+            </Pressable>
+
+            <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />
+          </Pressable>
+
+          <View style={{ flex: 1, padding: 10 }}>
+            {/* Categories */}
+            <FlatList
+              data={categories}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                style={{ alignItems: "center", marginRight: 15 }}
+                onPress={() => navigation.navigate("CategoryProductsScreen", { query: item.id })} 
+              >
+                <Image
+                  source={{ uri: item.image }}
+                  style={{ width: 60, height: 60, borderRadius: 30 }}
+                />
+                <Text>{item.id}</Text>
+              </TouchableOpacity>
+              
+              )}
+            />
+          </View>
+
+          <Carousel
+            width={width}
+            height={200}
+            data={images}
+            renderItem={({ item }) => (
+              <View style={styles.carouselItem}>
+                <Image
+                  source={{ uri: item.uri }}
+                  style={styles.carouselImage}
+                />
+              </View>
+            )}
+            loop
+            autoPlay
+            autoPlayInterval={3000}
+          />
+          <Text style={{ padding: 10, fontSize: 18, fontWeight: "bold" }}>
+            Trending Deals for You
+          </Text>
+
+          <View
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+          >
+            {deals.map((item, index) => (
+              <Pressable
+                onPress={() =>
+                  navigation.navigate("Info", {
+                    id: item.id,
+                    title: item.title,
+                    price: item?.price,
+                    carouselImages: item.carouselImages,
+                    color: item?.color,
+                    size: item?.size,
+                    oldPrice: item?.oldPrice,
+                    item: item,
+                  })
+                }
+                style={{
+                  marginVertical: 10,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  width: "50%",
+                }}
+              >
+                <Image
+                  style={{ width: 200, height: 200, resizeMode: "contain" }}
+                  source={{ uri: item?.image }}
+                />
+              </Pressable>
+            ))}
+          </View>
+          <Text style={{ padding: 10, fontSize: 18, fontWeight: "bold" }}>
+            Today's Deals
+          </Text>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {offers.map((item, index) => (
+              <Pressable
+                onPress={() =>
+                  navigation.navigate("Info", {
+                    id: item.id,
+                    title: item.title,
+                    price: item?.price,
+                    carouselImages: item.carouselImages,
+                    color: item?.color,
+                    size: item?.size,
+                    oldPrice: item?.oldPrice,
+                    item: item,
+                  })
+                }
+                style={{
+                  marginVertical: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Image
+                  style={{ width: 150, height: 150, resizeMode: "contain" }}
+                  source={{ uri: item?.image }}
+                />
+
+                <View
+                  style={{
+                    backgroundColor: "#E31837",
+                    paddingVertical: 5,
+                    width: 130,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginTop: 10,
+                    borderRadius: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: "white",
+                      fontSize: 13,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Upto {item?.offer}
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+          </ScrollView>
+
+          <View
+            style={{
+              marginHorizontal: 10,
+              marginTop: 20,
+              width: "45%",
+              marginBottom: open ? 50 : 15,
+            }}
+          >
+            <DropDownPicker
+              style={{
+                borderColor: "#B7B7B7",
+                height: 30,
+                marginBottom: open ? 120 : 15,
+              }}
+              open={open}
+              value={category}
+              items={items}
+              setOpen={setOpen}
+              setValue={setCategory}
+              setItems={setItems}
+              placeholder="Choose Category"
+              placeholderStyle={styles.placeholderStyles}
+              onOpen={onGenderOpen}
+              zIndex={3000}
+              zIndexInverse={1000}
+            />
+          </View>
+
+          <View
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+          >
+            {Products?.filter((item) => item.category === category).map(
+              (item, index) => (
+                <ProductItem item={item} key={index} />
+              )
+            )}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
