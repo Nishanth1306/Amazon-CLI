@@ -621,8 +621,7 @@ const Home = () => {
   }, []);
 
   const addToCart = (product) => {
-    // Implement your add to cart functionality
-    // dispatch(addToCartAction(product));
+    dispatch(addToCartAction(product));
   };
 
   return (
@@ -660,7 +659,7 @@ const Home = () => {
         {/* Today's Deals */}
         <TodaysDeals />
 
-        {/* Category Dropdown */}
+        
         <View style={styles.dropdownContainer}>
           <DropDownPicker
             style={styles.dropdown}
@@ -678,7 +677,7 @@ const Home = () => {
           />
         </View>
 
-        {/* Products Grid */}
+       
         <View style={styles.productsGrid}>
           {products
             .filter((item) => item.category === category)
