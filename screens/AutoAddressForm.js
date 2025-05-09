@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   View,
   TextInput,
@@ -9,22 +9,35 @@ import {
   Platform,
   StyleSheet,
   Text,
+  ScrollView,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { UserType } from "../UserContext";  
 import Geolocation from "@react-native-community/geolocation";
 import axios from "axios";
+import { useNavigation } from "@react-navigation/native";
+import config from "../src/config";
 
 const GEOAPIFY_API_KEY = "473e400a1cdb409ea64d7ef74d61f10b";
 
 const AutoAddressForm = () => {
+  const navigation = useNavigation();
+  const { userId, setUserId } = useContext(UserType);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [locationError, setLocationError] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
+    mobileNo: "",
+    country: "India",
     street: "",
     city: "",
-    state: "",
     postalCode: "",
-    country: "",
+    houseNo: "",
+    landmark: "",
   });
   const [manualEntry, setManualEntry] = useState(false);
 
@@ -43,7 +56,7 @@ const AutoAddressForm = () => {
         );
         return granted === PermissionsAndroid.RESULTS.GRANTED;
       }
-      return true; // iOS handles permissions differently
+      return true;
     } catch (err) {
       console.warn("Permission error:", err);
       return false;
@@ -62,12 +75,14 @@ const AutoAddressForm = () => {
 
       const data = response.data.features[0]?.properties;
       return {
-        name: data.name || "",
+        name: "",
+        mobileNo: "",
         street: data.street || data.address_line1 || "",
         city: data.city || data.town || data.village || "",
-        state: data.state || "",
         postalCode: data.postcode || "",
         country: data.country || "",
+        houseNo: data.house_number || "",
+        landmark: data.landmark || "",
       };
     } catch (error) {
       console.error("Geocoding error:", error);
@@ -84,7 +99,6 @@ const AutoAddressForm = () => {
         return;
       }
 
-      // First attempt: High accuracy with quick timeout
       Geolocation.getCurrentPosition(
         async (position) => {
           try {
@@ -145,16 +159,42 @@ const AutoAddressForm = () => {
     setFormData({ ...formData, [key]: value });
   };
 
-  const handleSubmit = () => {
-    if (!formData.street || !formData.city || !formData.postalCode) {
-      Alert.alert("Error", "Please fill in all required address fields");
-      return;
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      await axios.post(`${config.API_URL}/addresses`, {
+        userId,
+        address: formData
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });  
+      setFormData({
+        name: "",
+        mobileNo: "",
+        houseNo: "",
+        street: "",
+        landmark: "",
+        city: "",
+        postalCode: "",
+        country: "India",
+      });
+      
+      setTimeout(() => navigation.goBack(), 500);
+    } catch (error) {
+      console.error("Submission error:", error);
+      let errorMessage = "Failed to save address. Please try again.";
+      
+      if (error.response) {
+        errorMessage = error.response.data.message || errorMessage;
+      }
+      
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    Alert.alert("Address Submitted", JSON.stringify(formData, null, 2));
-
   };
-  
 
   const retryLocation = () => {
     setLoading(true);
@@ -164,7 +204,8 @@ const AutoAddressForm = () => {
 
   if (loading && !manualEntry) {
     return (
-      <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#00CED1" />
         <Text style={styles.loadingText}>Detecting your location...</Text>
         <Button
@@ -173,12 +214,14 @@ const AutoAddressForm = () => {
           color="#666"
         />
       </View>
+      </SafeAreaView>
     );
   }
 
   if (locationError && !manualEntry) {
     return (
-      <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <View style={styles.loadingContainer}>
         <Text style={styles.errorText}>{locationError}</Text>
         <View style={styles.buttonGroup}>
           <Button title="Retry Location" onPress={retryLocation} />
@@ -190,57 +233,97 @@ const AutoAddressForm = () => {
           />
         </View>
       </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Your Address</Text>
-      
-      {Object.entries(formData).map(([key, value]) => (
-        <TextInput
-          key={key}
-          placeholder={key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
-          value={value}
-          onChangeText={(text) => handleChange(key, text)}
-          style={styles.input}
-        />
-      ))}
-      
-      <View style={styles.buttonContainer}>
-        <Button 
-          title="Submit Address" 
-          onPress={handleSubmit} 
-          color="#00CED1"
-        />
-      </View>
-    </View>
+    
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.keyboardAvoidingView}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.container}>
+            <Text style={styles.title}>Your Address</Text>
+            {Object.entries(formData).map(([key, value]) => (
+              <View key={key} style={styles.inputGroup}>
+                <Text style={styles.label}>
+                  {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
+                </Text>
+                <TextInput
+                  value={value}
+                  onChangeText={(text) => handleChange(key, text)}
+                  style={styles.input}
+                  placeholder={`Enter ${key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}`}
+                  placeholderTextColor="#999"
+                />
+              </View>
+            ))}
+            <View style={styles.buttonContainer}>
+              <Button 
+                title={isSubmitting ? "Saving..." : "Submit Address"}
+                onPress={handleSubmit}
+                color="#FFAC1C"
+                disabled={isSubmitting}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 30,
+  },
   container: {
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 25,
     textAlign: 'center',
     color: '#333',
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#555',
   },
   input: {
     height: 50,
     borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 8,
-    marginBottom: 15,
     paddingHorizontal: 15,
     fontSize: 16,
     backgroundColor: '#f9f9f9',
+    color: '#333',
   },
   buttonContainer: {
     marginTop: 20,

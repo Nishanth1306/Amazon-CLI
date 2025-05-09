@@ -34,7 +34,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    paddingTop: Platform.OS === 'android' ? 5 : 0,
   },
   searchBar: {
     backgroundColor: '#00CED1',
