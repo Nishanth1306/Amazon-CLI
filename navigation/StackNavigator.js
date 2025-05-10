@@ -24,11 +24,13 @@ import ProductListScreen from '../screens/ProductListScreen';
 import EditAddressScreen from '../screens/EditAddressScreen';
 import UserOrdersScreen from '../screens/UserOrdersScreen';
 import UserAccountScreen from '../screens/UserAccountScreen';
+import ProductDetailScreen from '../screens/ProductDetailScreen';
 
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AutoAddressForm from '../screens/AutoAddressForm';
+import AutoPinScreen from '../screens/AutoPinScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -158,6 +160,19 @@ const StackNavigator = () => {
           options={{headerShown: false}}
         />
 
+        <Stack.Screen
+          name="ProductDetailScreen"
+          component={ProductDetailScreen}
+          options={{headerShown: false}}
+          />
+
+          <Stack.Screen
+          name="AutoPinScreen"
+          component={AutoPinScreen}
+          options={{headerShown: false}}
+          />
+
+          
         <Stack.Screen
           name="ForgotPassword"
           component={ForgotPassword}

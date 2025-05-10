@@ -322,7 +322,7 @@ const CartScreen = () => {
           <Entypo name='mic' size={24} color='black' />
         </View>
         <View style={styles.subtotalContainer}>
-          <Text style={styles.subtotalText}>Sub Total</Text>
+          <Text style={styles.subtotalText}>Sub Total : </Text>
           <Text style={styles.subtotalAmount}>{total}</Text>
         </View>
 
