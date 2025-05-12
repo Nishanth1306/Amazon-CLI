@@ -17,6 +17,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import config from '../src/config.js';
+import { CommonActions } from '@react-navigation/native';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +30,12 @@ const Login = () => {
         const token = await AsyncStorage.getItem('authToken');
 
         if (token) {
-          navigation.replace('Main');
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'Main' }],
+            })
+          );
         }
       } catch (err) {
         console.log('error message', err);
@@ -52,7 +58,12 @@ const Login = () => {
         await AsyncStorage.setItem('authToken', token);
         await AsyncStorage.setItem('userType', 'registered');
 
-        navigation.replace('Main');
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Main' }],
+          })
+        );
       })
       .catch((error) => {
         const errorMessage =

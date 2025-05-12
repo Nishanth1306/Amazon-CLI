@@ -164,15 +164,14 @@ const StackNavigator = () => {
           name="ProductDetailScreen"
           component={ProductDetailScreen}
           options={{headerShown: false}}
-          />
+        />
 
-          <Stack.Screen
+        <Stack.Screen
           name="AutoPinScreen"
           component={AutoPinScreen}
           options={{headerShown: false}}
-          />
+        />
 
-          
         <Stack.Screen
           name="ForgotPassword"
           component={ForgotPassword}
@@ -192,22 +191,23 @@ const StackNavigator = () => {
           options={{headerShown: false}}
         />
 
-        <Stack.Screen name="UserOrders" component={UserOrdersScreen}
-        options={{headerShown:false}} />
+        <Stack.Screen
+          name="UserOrders"
+          component={UserOrdersScreen}
+          options={{headerShown: false}}
+        />
 
         <Stack.Screen
-        name="UserAccount"
-        component={UserAccountScreen}
-        options={{headerShown:false}} />
-
+          name="UserAccount"
+          component={UserAccountScreen}
+          options={{headerShown: false}}
+        />
 
         <Stack.Screen
-        name="AutoAddressForm"
-        component={AutoAddressForm}
-        options={{headerShown:false}} />
-        
-        
-
+          name="AutoAddressForm"
+          component={AutoAddressForm}
+          options={{headerShown: false}}
+        />
 
         <Stack.Screen
           name="CategoryProductsScreen"

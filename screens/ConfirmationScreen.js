@@ -21,6 +21,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AddressModal from '../components/AddressModal1';
 
 const ConfirmationScreen = () => {
+  
   const [addressModalVisible, setAddressModalVisible] = useState(false);
   //const [selectedAddress, setSelectedAddress] = useState(null);
   const steps = [
@@ -35,11 +36,14 @@ const ConfirmationScreen = () => {
   const {userId, setUserId} = useContext(UserType);
   const cart = useSelector(state => state.cart.cart);
   const total = cart
-    ?.map(item => item.price * item.quantity)
+    .map((item) => {
+      return Number(item?.price.slice(1).replace(',',"")) * item.quantity
+    })
     .reduce((curr, prev) => curr + prev, 0);
   useEffect(() => {
     fetchAddresses();
   }, []);
+  console.log(total)
   const fetchAddresses = async () => {
     try {
       const response = await axios.get(`${config.API_URL}/addresses/${userId}`);
@@ -84,7 +88,7 @@ const ConfirmationScreen = () => {
       );
       if (response.status === 200) {
         Alert.alert('Success', 'Address removed successfully');
-        fetchAddresses(); // Refresh the address list
+        fetchAddresses(); 
       } else {
         Alert.alert('Error', 'Failed to remove address');
       }
@@ -515,7 +519,7 @@ const ConfirmationScreen = () => {
                 Items
               </Text>
 
-              <Text style={{color: 'gray', fontSize: 16}}>₹{total}</Text>
+              <Text style={{color: 'gray', fontSize: 16}}>{cart.length}</Text>
             </View>
 
             <View

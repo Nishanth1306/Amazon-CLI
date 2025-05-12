@@ -1,14 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import {
-  View,
-  TextInput,
-  Button,
-  Alert,
-  ActivityIndicator,
-  PermissionsAndroid,
-  Platform,
-  StyleSheet,
-  Text,
+import { View, TextInput, Button, Alert, ActivityIndicator,PermissionsAndroid,Platform,StyleSheet,Text,
   ScrollView,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,

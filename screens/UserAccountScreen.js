@@ -1,4 +1,3 @@
-// UserAccountScreen.js
 import React, { useEffect, useState, useContext } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import axios from "axios";
@@ -9,10 +8,6 @@ const UserAccountScreen = () => {
   const { userId } = useContext(UserType);
   const [user, setUser] = useState(null);
   
-  
-
-
-
   useEffect(() => {
     const fetchUser = async () => {
       try {
