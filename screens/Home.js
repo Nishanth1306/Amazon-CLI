@@ -471,19 +471,13 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {useSelector, useDispatch} from 'react-redux';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {jwtDecode} from 'jwt-decode';
 import axios from 'axios';
-
-
-// Icons
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-
-// Components
 import {UserType} from '../UserContext';
 import ProductItem from '../components/ProductItem';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -492,6 +486,9 @@ import Categories from '../components/Categories';
 import TrendingDeals from '../components/TrendingDeals';
 import TodaysDeals from '../components/TodaysDeals';
 import config from '../src/config';
+import { cleanCart } from '../redux/CartReducer';
+
+
 
 const Home = () => {
   //const [products, setProducts] = useState([]);
@@ -500,13 +497,15 @@ const Home = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [category, setCategory] = useState('jewelery');
-
   const navigation = useNavigation();
   const {userId, setUserId} = useContext(UserType);
   const backHandlerRef = useRef(null);
   const {width} = useWindowDimensions();
-  const cart = useSelector(state => state.cart.cart);
   const dispatch = useDispatch();
+
+
+dispatch(cleanCart());
+
 
  
   const [open, setOpen] = useState(false);
@@ -518,12 +517,6 @@ const Home = () => {
     {label: "Women's clothing", value: "women's clothing"},
   ]);
 
-
-
-
-
-
-
   useEffect(() => {
     const backAction = () => {
       if (modalVisible) {
@@ -533,12 +526,11 @@ const Home = () => {
       return false;
     };
 
-    // Clean up previous listener
+
     if (backHandlerRef.current) {
       backHandlerRef.current.remove();
     }
 
-    // Add new listener
     backHandlerRef.current = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction,
@@ -551,7 +543,6 @@ const Home = () => {
     };
   }, [modalVisible]);
 
-  // Fetch user data
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -568,7 +559,6 @@ const Home = () => {
     fetchUser();
   }, []);
 
-  // Fetch addresses
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
@@ -685,16 +675,12 @@ const Home = () => {
 
           <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />
         </Pressable>
-
        
         <Categories categories={categories} />
-
       
         <TrendingDeals />
 
-       
         <TodaysDeals />
-
 
         <View style={styles.dropdownContainer}>
           <DropDownPicker
@@ -717,8 +703,6 @@ const Home = () => {
             }}
           />
         </View>
-
-        {/* Add this view to prevent content overlap when dropdown is open */}
         {open && <View style={styles.dropdownSpacer} />}
 
         <View style={styles.productsGrid}>
@@ -728,11 +712,6 @@ const Home = () => {
             ),
           )}
         </View>
-
-        
-
-
-
       </ScrollView>
 
       <Modal
@@ -803,7 +782,9 @@ const Home = () => {
               </ScrollView>
 
               <View style={styles.modalFooter}>
-                <Pressable style={styles.footerOption}>
+                <Pressable 
+                onPress={() => (navigation.navigate("AutoPinScreen"))}
+                style={styles.footerOption}>
                   <Entypo name="location-pin" size={22} color="#0066b2" />
                   <Text style={styles.footerOptionText}>
                     Enter an Indian pincode

@@ -49,6 +49,7 @@ const ProductInfo = () => {
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const addItemToCart = item => {
+    console.log(item)
     setAddedToCart(true);
     dispatch(addToCart(item));
     setTimeout(() => {
@@ -209,12 +210,13 @@ const ProductInfo = () => {
       </View>
 
       <Text style={styles.inStockText}>IN Stock</Text>
-
       <Pressable
         onPress={() => addItemToCart(route?.params?.item)}
         style={styles.cartButton}>
+          
         <Text>{addedToCart ? 'Added to Cart' : 'Add to Cart'}</Text>
       </Pressable>
+
 
       <Pressable
         onPress={() => navigation.navigate('ConfirmationScreen')}

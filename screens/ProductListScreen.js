@@ -14,8 +14,11 @@ import {
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
+import { useNavigation } from '@react-navigation/native';
+
 
 const ProductListScreen = () => {
+  const navigation = useNavigation();
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [keyword, setKeyword] = useState('');
@@ -84,12 +87,15 @@ const ProductListScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
+      <TouchableOpacity onPress={() => navigation.navigate('ProductDetailScreen', { item: item })}>
       <Image source={{ uri: item.image }} style={styles.image} />
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.price}>
         {item.price} {item.currency}
       </Text>
+      </TouchableOpacity> 
     </View>
+   
   );
 
   if (loading) {
@@ -156,7 +162,7 @@ const styles = StyleSheet.create({
     padding: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: Platform.OS === 'android' ? 40 : 0,
+    // marginTop: Platform.OS === 'android' ? 40 : 0,
   },
   searchInput: {
     flexDirection: 'row',
