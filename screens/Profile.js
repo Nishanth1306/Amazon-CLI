@@ -78,8 +78,6 @@ const Profile = () => {
         const response = await axios.get(`${config.API_URL}/orders/${userId}`);
         const orders = response.data.orders;
         setOrders(orders);
-
-        setLoading(false);
       } catch (error) {
         console.log('error', error);
       }

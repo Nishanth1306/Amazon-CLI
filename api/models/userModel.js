@@ -137,7 +137,7 @@ resetPasswordExpires: Date,
         required: true,
       },
       price: {
-        type: Number,
+        type: String,
         required: true,
       },
       color: {

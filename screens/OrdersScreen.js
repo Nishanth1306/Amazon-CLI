@@ -15,6 +15,7 @@ const OrdersScreen = () => {
     const fetchOrders = async () => {
       try {
         const { data } = await axios.get(`${config.API_URL}/orders/${userId}`);
+        console.log("Data ",data);
         const sortedOrders = (data.orders || []).sort((a, b) => {
           return new Date(b.createdAt) - new Date(a.createdAt);
         });
@@ -100,7 +101,6 @@ const OrdersScreen = () => {
           </Text>
           
           <Text style={styles.sectionTitle}>Products:</Text>
-          <Text style={styles.sectionTitle}>Products:</Text>
            {order.products && order.products.length > 0 ? (
             order.products.map((product, index) => (
               <View key={index} style={styles.productItem}>
@@ -113,7 +113,7 @@ const OrdersScreen = () => {
                 )}
                 <View style={styles.productDetails}>
                   <Text style={styles.productName}>{product?.title}</Text>
-                  <Text style={styles.productPrice}>Price: ₹ {product?.price || '0.00'}</Text>
+                  <Text style={styles.productPrice}>Price: {product?.price || '0.00'}</Text>
                   <Text style={styles.productQuantity}>Quantity: {product.quantity || 1}</Text>
                   {product.color && <Text style={styles.productColor}>Color: {product.color}</Text>}
                 </View>
@@ -124,7 +124,7 @@ const OrdersScreen = () => {
           )}
             <View style={styles.summaryRow}>
              <Text style={styles.summaryLabel}>Total Price:</Text>
-             <Text style={styles.summaryValue}>₹{order.totalPrice?.toFixed(2) || order.price }</Text>
+             <Text style={styles.summaryValue}>₹{order.totalPrice || order.price }</Text>
            </View>
         </View>
       ))}

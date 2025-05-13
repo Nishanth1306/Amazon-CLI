@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
   res.send("Server is not running");
 });
 
-const IP = "192.168.0.107";
+const IP = "192.168.126.60";
 
 
 const PORT = 3000;
@@ -100,9 +100,6 @@ const sendForgotPasswordOTPEmail = async (email, otp) => {
 app.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
-
-    //console.log(req.body);
-
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
@@ -193,10 +190,8 @@ app.post("/login", async (req, res) => {
 app.post("/addresses", async (req, res) => {
   try {
     const { userId, address } = req.body;
-    
-    
     const user = await User.findById(userId);
-    //console.log(user, address);
+    
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -220,7 +215,6 @@ app.get("/addresses/:userId", async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    //console.log(user)
     const addresses = user.addresses;
     res.status(200).json({ addresses });
   } catch (error) {
@@ -240,8 +234,10 @@ const scheduleOneTimeNotification = async (user, delayInMinutes) => {
           title: "Order Placed 🎉",
           body: "Your order will be processed shortly.",
         },
+        data: {
+          url:  `amazon://orders/${user._id}`,  
+        },
       };
-
       console.log('Sending scheduled notification...');
       await admin.messaging().send(message);
       console.log('Scheduled notification sent successfully');
@@ -335,11 +331,8 @@ app.post("/forgot-password", async (req, res) => {
 
 app.post("/reset-password", async (req, res) => {
   const { email, otp, newPassword } = req.body;
-
   try {
     const user = await User.findOne({ email });
-    //console.log(user); 
-
     if (
       !user ||
       user.resetPasswordOTP !== otp ||
@@ -348,7 +341,6 @@ app.post("/reset-password", async (req, res) => {
     ) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
-
     const isValidPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/.test(newPassword);
     if (!isValidPassword) {
       return res.status(400).json({
@@ -356,7 +348,6 @@ app.post("/reset-password", async (req, res) => {
           "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
       });
     }
-
     user.password = newPassword;
     user.resetPasswordOTP = null;
     user.resetPasswordExpires = null;
@@ -407,7 +398,6 @@ app.post("/user/:userId/wishlist", async (req, res) => {
       color,
       image,
     };
-
     console.log(newProduct);
     user.wishlist.push(newProduct);
     await user.save();

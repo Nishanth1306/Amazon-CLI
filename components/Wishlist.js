@@ -8,8 +8,6 @@ import {addToCart} from '../redux/CartReducer';
 import {useDispatch } from 'react-redux';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
-
-
 const Wishlist = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -54,35 +52,8 @@ const Wishlist = () => {
       setAddedToCart(false);
     }, 6000);
   };
-
-  // const renderItem = ({item}) => (
-  //   <View style={styles.card}>
-  //     <Image source={{uri: item.image}} style={styles.image} />
-  //     <View style={{flex: 1, marginLeft: 10}}>
-  //       <Text style={styles.title}>{item.name}</Text>
-  //       <Text style={styles.description}>Size: {item.description}</Text>
-  //       <Text style={styles.color}>Color: {item.color}</Text>
-  //       <Text style={styles.price}>₹{item.price}</Text>
-  //       <Pressable
-  //         onPress={() => addItemToCart(item)}
-  //         style={styles.cartButton}>
-  //         <Text>{addedToCart ? 'Added to Cart' : 'Add to Cart'}</Text>
-  //       </Pressable>
-
-  //       <Pressable
-  //         onPress={() => navigation.navigate('ConfirmationScreen')}
-  //         style={styles.buyNowButton}>
-  //         <Text>Buy Now</Text>
-  //       </Pressable>
-  //       <Pressable
-  //       onPress={() => removeFromWishlist(item.id)}
-  //       style={styles.deleteButton}>
-  //       <Text style={{ color: 'white' }}>Delete</Text>
-  //     </Pressable>
-  //     </View>
-  //   </View>
-  // );
   const renderItem = ({ item }) => (
+    
     <View style={styles.card}>
       <Image source={{ uri: item.image }} style={styles.image} />
       <View style={{ flex: 1, marginLeft: 10 }}>
@@ -95,10 +66,12 @@ const Wishlist = () => {
           <Pressable onPress={() => addItemToCart(item)} style={styles.cartButton}>
             <Text style={styles.buttonText}>{addedToCart ? 'Added' : 'Cart'}</Text>
           </Pressable>
-  
-          <Pressable onPress={() => navigation.navigate('ConfirmationScreen')} style={styles.buyNowButton}>
+
+          
+          <Pressable onPress={() => navigation.navigate('ConfirmationScreen',item)} style={styles.buyNowButton}>
             <Text style={styles.buttonText}>Buy</Text>
           </Pressable>
+          console.log(route?.params?.item)
   
           <Pressable onPress={() => removeFromWishlist(item.id)} style={styles.deleteButton}>
             <Text style={[styles.buttonText, { color: 'white' }]}>Delete</Text>

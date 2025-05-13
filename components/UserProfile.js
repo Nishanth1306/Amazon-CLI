@@ -113,7 +113,6 @@ const UserProfile = () => {
           <Pressable
             key={order._id}
             style={styles.orderCard}
-            onPress={() => navigation.navigate('OrderDetails', { orderId: order._id })}
           >
             <View style={styles.orderHeader}>
               <Text style={styles.orderDate}>

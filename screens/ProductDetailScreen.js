@@ -29,8 +29,10 @@ const ProductDetailScreen = () => {
 
 
   const {item} = route.params || {};
-  const isInCart = cart.some(item => item?.asin === item?.asin);
-  console.log(item);
+  const isInCart = cart.some(cartItem =>
+    cartItem?.asin === item?.asin || cartItem?._id === item?._id
+  );
+  
 
   const addItemToCart = item => {
     setAddedToCart(true);
@@ -47,14 +49,6 @@ const ProductDetailScreen = () => {
   const numericPrice = typeof item.price === 'string' ? getPriceNumber(item.price) : item.price;
   
 
- 
-  // const getPriceNumber = (priceStr) => {
-  //   try {
-  //     return parseInt(priceStr?.replace(/[^0-9]/g, '') || 0);
-  //   } catch {
-  //     return 0;
-  //   }
-  // };
 
   const calculateDiscount = () => {
     try {
@@ -71,10 +65,10 @@ const ProductDetailScreen = () => {
 
   const discountPercentage = calculateDiscount();
 
-  //Handlers with error prevention
+
   const handleAddToCart = () => {
     try {
-      if (item?.asin) {
+      if (item?._id) {
         dispatch(addToCart(item));
         Alert.alert('Added to Cart', `${item?.title || 'Item'} added to cart`);
       }
@@ -90,17 +84,7 @@ const ProductDetailScreen = () => {
       if (!isInCart && item?.asin) {
         dispatch(addToCart(item));
       }
-      
-
-      const numericPrice = getPriceNumber(item?.price);
-
-     
-      const itemWithNumericPrice = {
-        ...item,
-        price: numericPrice,
-      };
-  
-      navigation.navigate('ConfirmationScreen', { item: itemWithNumericPrice });
+      navigation.navigate('ConfirmationScreen', route.params.item);
 
 
     } catch (error) {

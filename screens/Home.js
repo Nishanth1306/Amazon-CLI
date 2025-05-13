@@ -47,12 +47,6 @@ const Home = () => {
   const backHandlerRef = useRef(null);
   const {width} = useWindowDimensions();
   const dispatch = useDispatch();
-
-
-dispatch(cleanCart());
-
-
- 
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('jewelery');
   const [items, setItems] = useState([
@@ -562,14 +556,14 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   dropdownSpacer: {
-    height: 200, // Adjust based on your dropdown content height
+    height: 200, 
   },
   productsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    zIndex: 1, // Lower than dropdown
+    paddingHorizontal: 5,
+    zIndex: 1, 
   },
 });
 

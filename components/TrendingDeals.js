@@ -67,6 +67,8 @@ const TrendingDeals = () => {
         'https://m.media-amazon.com/images/I/61og60CnGlL._SX679_.jpg',
         'https://m.media-amazon.com/images/I/61twx1OjYdL._SX679_.jpg',
       ],
+      color:"green",
+      size:"8 GB RAM",
     },
   ];
   return (
@@ -86,7 +88,7 @@ const TrendingDeals = () => {
           return(
           
           <Pressable
-          
+          key={index}
             onPress={() =>
               navigation.navigate('Info', {
                 id: item.id,

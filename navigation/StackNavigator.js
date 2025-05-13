@@ -32,6 +32,10 @@ import AutoAddressForm from '../screens/AutoAddressForm';
 import AutoPinScreen from '../screens/AutoPinScreen';
 import OrdersScreen from '../screens/OrdersScreen';
 
+
+import { Linking } from 'react-native';
+
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -105,9 +109,18 @@ function BottomTabs() {
 }
 
 const StackNavigator = () => {
+  const linking = {
+    prefixes: ['amazon://'],
+    config: {
+      screens: {
+        Home: 'home',
+        OrdersScreen: 'orders/:userId', 
+      },
+    },
+  };
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Landing">
+    <NavigationContainer linking={linking}>
+      <Stack.Navigator>
         <Stack.Screen
           name="Login"
           component={Login}

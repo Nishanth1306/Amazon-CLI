@@ -18,7 +18,6 @@ const Search = () => {
       style={styles.searchInput}>
         <AntDesign name="search1" size={24} color="black" />
         <Text>Search</Text> 
-        {/* placeholder="Search" style={styles.input} /> */}
         </View>
       
       <Entypo name="mic" size={24} color="black" />

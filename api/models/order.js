@@ -10,7 +10,7 @@ const orderSchema = new mongoose.Schema({
         {
             title:{
                 type: String,
-                required: true,
+                // required: true,
             },
             quantity:{
                 type: Number,
@@ -27,7 +27,7 @@ const orderSchema = new mongoose.Schema({
         },
     ],
     totalPrice:{
-        type:Number,
+        type:String,
         required: true,
     },
     shippingAddress:{

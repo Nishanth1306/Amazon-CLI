@@ -7,7 +7,6 @@ import {
   TextInput,
   ImageBackground,
   Dimensions,
-  SafeAreaView,
   Alert,
 } from 'react-native';
 import React, {useState, useContext, useEffect} from 'react';
@@ -24,6 +23,7 @@ import config from '../src/config.js';
 import axios from 'axios';
 import {UserType} from '../UserContext';
 import {Animated, Easing} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ProductInfo = () => {
   const scaleAnim = useState(new Animated.Value(1))[0];
@@ -93,7 +93,8 @@ const ProductInfo = () => {
         await axios.delete(`${config.API_URL}/user/${userId}/wishlist/${product.id}`);
         setIsWishlisted(false);
        
-      } else {
+      } 
+      else {
        
         await axios.post(`${config.API_URL}/user/${userId}/wishlist`, {
           name: product.title,
@@ -114,8 +115,8 @@ const ProductInfo = () => {
   };
   
   return (
-    // <SafeAreaView>
-    <ScrollView
+    <ScrollView>
+    <SafeAreaView
       style={{flex: 1, backgroundColor: 'white'}}
       showsVerticalScrollIndicator={false}>
       <View style={styles.searchHeader}>
@@ -130,6 +131,7 @@ const ProductInfo = () => {
         </Pressable>
         <Feather name="mic" size={24} color="black" />
       </View>
+      </SafeAreaView>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {route.params.carouselImages.map((item, index) => (
@@ -147,7 +149,7 @@ const ProductInfo = () => {
                     onShare({
                       name: route?.params?.title,
                       description: `Price: ₹${route?.params?.price}, Size: ${route?.params?.size}, Color: ${route?.params?.color}`,
-                      url: `https://yourshop.com/product/${
+                      url: `https://amazon.com/product/${
                         route?.params?.id ||
                         route?.params?.title.replace(/\s+/g, '-')
                       }`,
@@ -164,7 +166,7 @@ const ProductInfo = () => {
 
 
 
-            <Animated.View style={[styles.heartIcon,{transform: [{scale: scaleAnim}]}]}>
+            <Animated.View style={[styles.heartIcon, { transform: [{ scale: scaleAnim }] }]}>
               <Pressable onPress={handleAddToWishlist} disabled={loading}>
                 <AntDesign
                   name={isWishlisted ? 'heart' : 'hearto'}
@@ -217,6 +219,7 @@ const ProductInfo = () => {
         <Text>{addedToCart ? 'Added to Cart' : 'Add to Cart'}</Text>
       </Pressable>
 
+    
 
       <Pressable
         onPress={() => navigation.navigate('ConfirmationScreen',route?.params?.item)}
@@ -224,7 +227,6 @@ const ProductInfo = () => {
         <Text>Buy Now</Text>
       </Pressable>
     </ScrollView>
-    // </SafeAreaView>
   );
 };
 

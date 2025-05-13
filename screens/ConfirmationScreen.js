@@ -35,17 +35,21 @@ const ConfirmationScreen = () => {
   const {userId, setUserId} = useContext(UserType);
   const cart = useSelector(state => state.cart.cart);
   const total = cart
-    .map((item) => {
-      return Number(item?.price.slice(1).replace(',',"")) * item.quantity
-    })
-    .reduce((curr, prev) => curr + prev, 0);
+  .map(item => {
+    const priceValue =
+      typeof item.price === 'string'
+        ? Number(item.price.replace(/[^0-9.]/g, '')) 
+        : item.price;
+
+    return priceValue * item.quantity;
+  })
+  .reduce((curr, prev) => curr + prev, 0);
 
   useFocusEffect(
     React.useCallback(() => {
       fetchAddresses();
     }, [])
   );
-
   const fetchAddresses = async () => {
     try {
       const response = await axios.get(`${config.API_URL}/addresses/${userId}`);
@@ -65,7 +69,7 @@ const ConfirmationScreen = () => {
       const orderData = {
         userId: userId,
         cartItems: cart,
-        totalPrice: total,
+        totalPrice: total || route.params?.price,
         shippingAddress: selectedAddress,
         paymentMethod: selectedOption,
       };
@@ -115,13 +119,12 @@ const ConfirmationScreen = () => {
         },
         theme: {color: '#F37254'},
       };
-
       const data = await RazorpayCheckout.open(options);
 
       const orderData = {
         userId: userId,
         cartItems: cart,
-        totalPrice: total,
+        totalPrice: total || route.params?.price,
         shippingAddress: selectedAddress,
         paymentMethod: 'card',
       };
@@ -535,10 +538,8 @@ const ConfirmationScreen = () => {
               <Text style={{fontSize: 16, fontWeight: '500', color: 'gray'}}>
                 Delivery
               </Text>
-
               <Text style={{color: 'gray', fontSize: 16}}>₹0</Text>
             </View>
-
             <View
               style={{
                 flexDirection: 'row',
@@ -549,10 +550,11 @@ const ConfirmationScreen = () => {
               <Text style={{fontSize: 20, fontWeight: 'bold'}}>
                 Order Total
               </Text>
-
+              
               <Text
                 style={{color: '#C60C30', fontSize: 17, fontWeight: 'bold'}}>
-                ₹{total || route?.params?.price}
+                ₹{total || parseFloat(route.params?.price.replace(/[^0-9.]/g, ''))}
+                
               </Text>
             </View>
           </View>

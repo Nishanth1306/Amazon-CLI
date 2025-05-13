@@ -15,8 +15,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { useNavigation } from '@react-navigation/native';
-
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 const ProductListScreen = () => {
   const navigation = useNavigation();
   const [products, setProducts] = useState([]);
@@ -24,7 +23,7 @@ const ProductListScreen = () => {
   const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const BASE_URL = 'http://192.168.0.107:5000';
+  const BASE_URL = 'http://192.168.126.60:5000';
 
   const fetchAllProducts = async () => {
     try {
@@ -45,7 +44,6 @@ const ProductListScreen = () => {
       setFiltered(products);
       return;
     }
-
     try {
       const response = await fetch(`${BASE_URL}/search?keyword=${text}`);
       const data = await response.json();
@@ -84,8 +82,8 @@ const ProductListScreen = () => {
     }
   };
   
-
   const renderItem = ({ item }) => (
+    
     <View style={styles.card}>
       <TouchableOpacity onPress={() => navigation.navigate('ProductDetailScreen', { item: item })}>
       <Image source={{ uri: item.image }} style={styles.image} />
@@ -95,6 +93,7 @@ const ProductListScreen = () => {
       </Text>
       </TouchableOpacity> 
     </View>
+    
    
   );
 
@@ -103,6 +102,7 @@ const ProductListScreen = () => {
   }
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
     <View style={{ flex: 1 }}>
       <View style={styles.searchBar}>
         <View style={styles.searchInput}>
@@ -115,8 +115,8 @@ const ProductListScreen = () => {
           />
         </View>
 
-        <TouchableOpacity >
-          <Entypo name="mic" size={24} color="black" onPress={handleMicPress}/>
+        <TouchableOpacity onPress={handleMicPress}>
+          <Entypo name="mic" size={24} color="black" />
         </TouchableOpacity>
       </View>
 
@@ -127,6 +127,32 @@ const ProductListScreen = () => {
         contentContainerStyle={styles.container}
       />
     </View>
+  </SafeAreaView>
+   
+    // <View style={{ flex: 1 }}>
+    //   <View style={styles.searchBar}>
+    //     <View style={styles.searchInput}>
+    //       <AntDesign name="search1" size={24} color="black" />
+    //       <TextInput
+    //         placeholder="Search products..."
+    //         value={keyword}
+    //         onChangeText={searchProducts}
+    //         style={{ flex: 1 }}
+    //       />
+    //     </View>
+
+    //     <TouchableOpacity >
+    //       <Entypo name="mic" size={24} color="black" onPress={handleMicPress}/>
+    //     </TouchableOpacity>
+    //   </View>
+    //   <FlatList
+    //     data={filtered}
+    //     keyExtractor={item => item._id}
+    //     renderItem={renderItem}
+    //     contentContainerStyle={styles.container}
+    //   />
+    // </View>
+   
   );
 };
 
