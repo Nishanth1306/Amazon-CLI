@@ -164,7 +164,7 @@ const UserProfile = () => {
 
         <View style={styles.buttonRow}>
           <Pressable
-            onPress={() => navigation.navigate('UserOrders')}
+            onPress={() => navigation.navigate('OrdersScreen',{userId:userId})}
             style={styles.actionButton}
           >
             <MaterialIcons name="list-alt" size={24} color="#FF9900" />

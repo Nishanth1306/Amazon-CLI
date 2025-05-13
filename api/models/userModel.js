@@ -106,6 +106,10 @@ resetPasswordExpires: Date,
     }
     
   },
+  fcmToken: {
+    type: String,
+    default: null,
+  },
   verified: {
     type: Boolean,
     default: false,
