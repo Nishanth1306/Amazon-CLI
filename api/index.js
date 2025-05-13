@@ -10,6 +10,9 @@ import bcrypt from "bcryptjs";
 
 import User from "../api/models/userModel.js";
 import Order from "../api/models/order.js";
+import admin from "./firebase.js";
+import cron from 'node-cron';
+
 
 dotenv.config();
 
@@ -225,41 +228,58 @@ app.get("/addresses/:userId", async (req, res) => {
   }
 });
 
+
+const scheduleOneTimeNotification = async (user, delayInMinutes) => {
+  const delayInMilliseconds = delayInMinutes * 60 * 1000;  
+
+  setTimeout(async () => {
+    try {
+      const message = {
+        token: user.fcmToken,
+        notification: {
+          title: "Order Placed 🎉",
+          body: "Your order will be processed shortly.",
+        },
+      };
+
+      console.log('Sending scheduled notification...');
+      await admin.messaging().send(message);
+      console.log('Scheduled notification sent successfully');
+    } catch (error) {
+      console.error("Error sending scheduled notification:", error);
+    }
+  }, delayInMilliseconds);
+};
+
+
 app.post("/orders", async (req, res) => {
   try {
-    const { userId, cartItems, totalPrice, shippingAddress, paymentMethod } =
-      req.body;
-    
-
+    const { userId, cartItems, totalPrice, shippingAddress, paymentMethod } = req.body;
     const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const Products = cartItems.map((item) => ({
-      title:item?.title,
-      quantity: item?.quantity,
-      price: item?.price,
-      image: item?.image,
-    }));
-
     const order = new Order({
       user: userId,
-      products: Products,
+      products: cartItems,
       totalPrice: totalPrice,
       shippingAddress: shippingAddress,
       paymentMethod: paymentMethod,
     });
-
     await order.save();
-    res.status(200).json({ message: "Order created successfully" });
 
+    await scheduleOneTimeNotification(user, 1);
+
+    return res.status(200).json({ message: "Order placed and notification scheduled." });
   } catch (error) {
-    res.status(500).json({ message: "Error creating order" });
-    console.log("Error creating order", error);
+    console.error("Error placing order or scheduling notification:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
 
 app.get("/orders/:userId",async(req,res) => {
   try{
@@ -436,36 +456,25 @@ app.delete('/user/:userId/wishlist/:productId', async (req, res) => {
   }
 });
 
-
 app.put('/addresses/:addressId', async (req, res) => {
   const { addressId } = req.params;
   const update = req.body;
-  console.log(update);
-
   try {
-   
     const user = await User.findOne({ "addresses._id": addressId });
 
     if (!user) {
       return res.status(404).json({ message: "Address not found" });
     }
-
-    // Find the specific address and update its fields
     const address = user.addresses.id(addressId);
     if (!address) {
       return res.status(404).json({ message: "Address not found in user document" });
     }
-
-    // Update only the fields that were provided
     Object.keys(update).forEach((key) => {
       if (key in address) {
         address[key] = update[key];
       }
     });
-
-    // Save the updated user document
     await user.save();
-
     res.status(200).json({
       message: "Address updated successfully",
       address,
@@ -473,5 +482,32 @@ app.put('/addresses/:addressId', async (req, res) => {
   } catch (error) {
     console.error("Error updating address:", error);
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+app.post('/user/:userId/fcmtoken', async (req, res) => {
+  try {
+    const { token } = req.body;
+    const userId = req.params.userId;
+
+    if (!userId || !token) {
+      return res.status(400).json({ message: 'userId and token are required' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { fcmToken: token },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    console.log("Token Saved");
+    return res.status(200).json({ message: 'FCM token updated successfully', user });
+  } catch (error) {
+    console.error('Error updating FCM token:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
