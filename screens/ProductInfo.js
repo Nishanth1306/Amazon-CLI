@@ -219,7 +219,7 @@ const ProductInfo = () => {
 
 
       <Pressable
-        onPress={() => navigation.navigate('ConfirmationScreen')}
+        onPress={() => navigation.navigate('ConfirmationScreen',route?.params?.item)}
         style={styles.buyNowButton}>
         <Text>Buy Now</Text>
       </Pressable>

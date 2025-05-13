@@ -43,12 +43,7 @@ const EditAddressScreen = () => {
         city,
         postalCode,
       };
-
-     
-
       await axios.put(`${config.API_URL}/addresses/${address._id}`, payload);
-
-
       Alert.alert('Success', 'Address updated successfully');
       navigation.goBack();
     } catch (error) {

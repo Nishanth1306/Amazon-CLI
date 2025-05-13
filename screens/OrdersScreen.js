@@ -15,8 +15,10 @@ const OrdersScreen = () => {
     const fetchOrders = async () => {
       try {
         const { data } = await axios.get(`${config.API_URL}/orders/${userId}`);
-        console.log('Orders:', data);
-        setOrders(data.orders || []);
+        const sortedOrders = (data.orders || []).sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        setOrders(sortedOrders);
         setLoading(false);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch orders');
@@ -58,7 +60,7 @@ const OrdersScreen = () => {
       {orders.map((order) => (
         <View key={order._id} style={styles.orderCard}>
           <View style={styles.orderHeader}>
-            <Text style={styles.orderId}>Order ID: {order._id}</Text>
+            <Text style={styles.orderId}>Order #: {order._id.substring(18, 24).toUpperCase()}</Text>
             <View style={[
               styles.statusBadge,
               { backgroundColor: order.paymentMethod === 'cash' ? '#FFA000' : '#4CAF50' }
@@ -70,7 +72,13 @@ const OrdersScreen = () => {
           </View>
           
           <Text style={styles.orderText}>
-            Order Date: {new Date(order.createdAt).toLocaleDateString()}
+            Order Date: {new Date(order.createdAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
           </Text>
           
           <Text style={styles.sectionTitle}>Customer Details:</Text>
@@ -92,7 +100,8 @@ const OrdersScreen = () => {
           </Text>
           
           <Text style={styles.sectionTitle}>Products:</Text>
-          {order.products && order.products.length > 0 ? (
+          <Text style={styles.sectionTitle}>Products:</Text>
+           {order.products && order.products.length > 0 ? (
             order.products.map((product, index) => (
               <View key={index} style={styles.productItem}>
                 {product.image && (
@@ -113,11 +122,10 @@ const OrdersScreen = () => {
           ) : (
             <Text style={styles.noProductsText}>No products in this order</Text>
           )}
-          
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Total Price:</Text>
-            <Text style={styles.summaryValue}>₹{order.totalPrice?.toFixed(2) || '0.00'}</Text>
-          </View>
+            <View style={styles.summaryRow}>
+             <Text style={styles.summaryLabel}>Total Price:</Text>
+             <Text style={styles.summaryValue}>₹{order.totalPrice?.toFixed(2) || order.price }</Text>
+           </View>
         </View>
       ))}
     </ScrollView>

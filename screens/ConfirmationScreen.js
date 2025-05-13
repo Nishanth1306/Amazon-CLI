@@ -7,12 +7,12 @@ import {
   Alert,
 } from 'react-native';
 import React, {useState, useEffect, useContext} from 'react';
+import {useFocusEffect} from '@react-navigation/native';
 import axios from 'axios';
 import {UserType} from '../UserContext';
-
 import {useDispatch, useSelector} from 'react-redux';
 import {cleanCart} from '../redux/CartReducer';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation,useRoute} from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
 import config from '../src/config.js';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -21,9 +21,8 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AddressModal from '../components/AddressModal1';
 
 const ConfirmationScreen = () => {
-  
+  const route = useRoute();
   const [addressModalVisible, setAddressModalVisible] = useState(false);
-  //const [selectedAddress, setSelectedAddress] = useState(null);
   const steps = [
     {title: 'Address', content: 'Address Form'},
     {title: 'Delivery', content: 'Delivery Options'},
@@ -40,10 +39,13 @@ const ConfirmationScreen = () => {
       return Number(item?.price.slice(1).replace(',',"")) * item.quantity
     })
     .reduce((curr, prev) => curr + prev, 0);
-  useEffect(() => {
-    fetchAddresses();
-  }, []);
-  console.log(total)
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchAddresses();
+    }, [])
+  );
+
   const fetchAddresses = async () => {
     try {
       const response = await axios.get(`${config.API_URL}/addresses/${userId}`);
@@ -271,6 +273,7 @@ const ConfirmationScreen = () => {
                       marginTop: 7,
                     }}>
                     <Pressable
+                    onPress={() => {navigation.navigate('EditAddress', {address: item})}}
                       style={{
                         backgroundColor: '#F5F5F5',
                         paddingHorizontal: 10,
@@ -519,7 +522,7 @@ const ConfirmationScreen = () => {
                 Items
               </Text>
 
-              <Text style={{color: 'gray', fontSize: 16}}>{cart.length}</Text>
+              <Text style={{color: 'gray', fontSize: 16}}>{cart.length || 1}</Text>
             </View>
 
             <View
@@ -549,7 +552,7 @@ const ConfirmationScreen = () => {
 
               <Text
                 style={{color: '#C60C30', fontSize: 17, fontWeight: 'bold'}}>
-                ₹{total}
+                ₹{total || route?.params?.price}
               </Text>
             </View>
           </View>
