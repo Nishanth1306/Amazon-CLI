@@ -19,7 +19,6 @@ import CategoryProductsScreen from '../screens/CategoryProductsScreen';
 import LandingPage from '../screens/LandingPage';
 import Language from '../screens/Language';
 import MenuScreen from '../screens/MenuScreen';
-import Accounts from '../screens/Accounts';
 import ProductListScreen from '../screens/ProductListScreen';
 import EditAddressScreen from '../screens/EditAddressScreen';
 import UserOrdersScreen from '../screens/UserOrdersScreen';
@@ -31,6 +30,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AutoAddressForm from '../screens/AutoAddressForm';
 import AutoPinScreen from '../screens/AutoPinScreen';
+import OrdersScreen from '../screens/OrdersScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -120,12 +120,6 @@ const StackNavigator = () => {
         />
 
         <Stack.Screen
-          name="Accounts"
-          component={Accounts}
-          options={{headerShown: false}}
-        />
-
-        <Stack.Screen
           name="Main"
           component={BottomTabs}
           options={{headerShown: false}}
@@ -196,6 +190,12 @@ const StackNavigator = () => {
           component={UserOrdersScreen}
           options={{headerShown: false}}
         />
+
+        <Stack.Screen
+        name="OrdersScreen"
+        component={OrdersScreen}
+        options={{headerShown: false}}
+      />
 
         <Stack.Screen
           name="UserAccount"
