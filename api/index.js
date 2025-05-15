@@ -5,14 +5,12 @@ import cors from "cors";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
-import dotenv from "dotenv";
+import dotenv, { decrypt } from "dotenv";
 import bcrypt from "bcryptjs";
-
 import User from "../api/models/userModel.js";
 import Order from "../api/models/order.js";
 import admin from "./firebase.js";
 import cron from 'node-cron';
-
 
 dotenv.config();
 
@@ -20,12 +18,6 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(cors());
-//   cors({
-//     origin: "*",
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -40,8 +32,7 @@ app.get("/", (req, res) => {
   res.send("Server is not running");
 });
 
-const IP = "192.168.126.60";
-
+const IP = "192.168.0.107";
 
 const PORT = 3000;
 
@@ -100,6 +91,10 @@ const sendForgotPasswordOTPEmail = async (email, otp) => {
 app.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password,10);
+
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
@@ -107,7 +102,7 @@ app.post("/register", async (req, res) => {
     const newUser = new User({
       name,
       email,
-      password: password,
+      password: hashedPassword,
       verificationToken: crypto.randomBytes(20).toString("hex"),
     });
 
@@ -160,24 +155,24 @@ app.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
- 
-    if (user.password !== password) {
-      return res.status(401).json({ message: "Invalid password" });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     if (!user.verified) {
       return res.status(403).json({
-        message: "Account not verified. Please check your email for verification link.",
+        message: "Account not verified. Please check your email for the verification link.",
       });
     }
-    const token = jwt.sign({ userId: user._id }, secretKey);
-    console.log("User logged in successfully");
 
+    const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: "7d" });
+
+    console.log("User logged in successfully");
     res.status(200).json({ token });
 
   } catch (error) {
@@ -185,7 +180,6 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ message: "Login failed. Please try again later." });
   }
 });
-
 
 app.post("/addresses", async (req, res) => {
   try {
@@ -222,7 +216,6 @@ app.get("/addresses/:userId", async (req, res) => {
   }
 });
 
-
 const scheduleOneTimeNotification = async (user, delayInMinutes) => {
   const delayInMilliseconds = delayInMinutes * 60 * 1000;  
 
@@ -231,7 +224,7 @@ const scheduleOneTimeNotification = async (user, delayInMinutes) => {
       const message = {
         token: user.fcmToken,
         notification: {
-          title: "Order Placed 🎉",
+          title: "Order Placed",
           body: "Your order will be processed shortly.",
         },
         data: {
@@ -239,15 +232,14 @@ const scheduleOneTimeNotification = async (user, delayInMinutes) => {
         },
       };
       console.log('Sending scheduled notification...');
-      await admin.messaging().send(message);
-      console.log('Scheduled notification sent successfully');
+      const response = await admin.messaging().send(message);
+
+      console.log('Scheduled notification sent successfully',response);
     } catch (error) {
       console.error("Error sending scheduled notification:", error);
     }
   }, delayInMilliseconds);
 };
-
-
 app.post("/orders", async (req, res) => {
   try {
     const { userId, cartItems, totalPrice, shippingAddress, paymentMethod } = req.body;
@@ -370,20 +362,16 @@ app.delete("/addresses/:userId/:addressId", async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
     user.addresses = user.addresses.filter(
       (address) => address._id.toString() !== addressId
     );
-
     await user.save();
-
     res.status(200).json({ message: "Address deleted successfully" });
   } catch (error) {
     console.error("Error deleting address:", error);
     res.status(500).json({ error: "Failed to delete address" });
   }
 });
-
 
 app.post("/user/:userId/wishlist", async (req, res) => {
   const { userId } = req.params;
@@ -408,10 +396,8 @@ app.post("/user/:userId/wishlist", async (req, res) => {
   }
 });
 
-
 app.get("/user/:userId/wishlist", async (req, res) => {
   const { userId } = req.params;
-
   try {
     const user = await User.findById(userId);
     res.status(200).json(user.wishlist); 
@@ -419,7 +405,6 @@ app.get("/user/:userId/wishlist", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 app.delete('/user/:userId/wishlist/:productId', async (req, res) => {
   const { userId, productId } = req.params;
