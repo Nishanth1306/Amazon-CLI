@@ -18,10 +18,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import config from '../src/config.js';
 import {CommonActions} from '@react-navigation/native';
+<<<<<<< HEAD
 import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { signIn } from '../OAuth/signin.ts';
 
 
+=======
+
+import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+  webClientId: '534135288686-c39dv0vl3tfiv6mrpi876ebtadtdsr5c.apps.googleusercontent.com',
+  androidClientId: '534135288686-1u2uha26gm8kdtdne0r3ekhcd9uh8u32.apps.googleusercontent.com',
+  scopes: ['profile', 'email'],
+});
+>>>>>>> 0e03bad458ea318d0d3971c8371694d800c08ab5
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -48,6 +59,27 @@ const Login = () => {
     checkLoginStatus();
   }, []);
 
+<<<<<<< HEAD
+=======
+
+  const signIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      console.log('User Info:', userInfo);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{name: 'Main'}],
+        }),
+      );
+    } catch (error) {
+      console.error('Google Sign-In error:', error);
+    }
+  };
+  
+
+>>>>>>> 0e03bad458ea318d0d3971c8371694d800c08ab5
   const handleLogin = () => {
     const user = {
       email: email,
@@ -215,11 +247,18 @@ const Login = () => {
         </Pressable>
 
         <GoogleSigninButton
+<<<<<<< HEAD
             size={GoogleSigninButton.Size.Wide}
             color={GoogleSigninButton.Color.Dark}
             onPress={signIn}
             //disabled={isInProgress}
           />
+=======
+        size={GoogleSigninButton.Size.Wide}
+        color={GoogleSigninButton.Color.Dark}
+        onPress={signIn}
+      />
+>>>>>>> 0e03bad458ea318d0d3971c8371694d800c08ab5
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
