@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {
   StyleSheet,
@@ -15,9 +15,13 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import config from '../src/config.js';
-import { CommonActions } from '@react-navigation/native';
+import {CommonActions} from '@react-navigation/native';
+import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import { signIn } from '../OAuth/signin.ts';
+
+
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -33,8 +37,8 @@ const Login = () => {
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
-              routes: [{ name: 'Main' }],
-            })
+              routes: [{name: 'Main'}],
+            }),
           );
         }
       } catch (err) {
@@ -44,7 +48,6 @@ const Login = () => {
     checkLoginStatus();
   }, []);
 
- 
   const handleLogin = () => {
     const user = {
       email: email,
@@ -53,7 +56,7 @@ const Login = () => {
 
     axios
       .post(`${config.API_URL}/login`, user)
-      .then(async (response) => {
+      .then(async response => {
         const token = response.data.token;
         await AsyncStorage.setItem('authToken', token);
         await AsyncStorage.setItem('userType', 'registered');
@@ -61,11 +64,11 @@ const Login = () => {
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
-            routes: [{ name: 'Main' }],
-          })
+            routes: [{name: 'Main'}],
+          }),
         );
       })
-      .catch((error) => {
+      .catch(error => {
         const errorMessage =
           error.response?.data?.message || 'Something went wrong during login';
 
@@ -75,33 +78,31 @@ const Login = () => {
   };
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: 'white', alignItems: 'center' }}
-    >
+      style={{flex: 1, backgroundColor: 'white', alignItems: 'center'}}>
       <View>
         <Image
-          style={{ width: 150, height: 100, marginTop: 15 }}
+          style={{width: 150, height: 100, marginTop: 15}}
           source={{
             uri: 'https://assets.stickpng.com/thumbs/6160562276000b00045a7d97.png',
           }}
-          onError={(e) => console.log('Image Load Error:', e.nativeEvent.error)}
+          onError={e => console.log('Image Load Error:', e.nativeEvent.error)}
         />
       </View>
 
       <KeyboardAvoidingView>
-        <View style={{ alignItems: 'center' }}>
+        <View style={{alignItems: 'center'}}>
           <Text
             style={{
               fontSize: 17,
               fontWeight: 'bold',
               marginTop: 12,
               color: '#041E42',
-            }}
-          >
+            }}>
             Login to Your Account
           </Text>
         </View>
 
-        <View style={{ marginTop: 70 }}>
+        <View style={{marginTop: 70}}>
           <View
             style={{
               flexDirection: 'row',
@@ -111,13 +112,12 @@ const Login = () => {
               paddingVertical: 5,
               borderRadius: 5,
               marginTop: 30,
-            }}
-          >
+            }}>
             <MaterialCommunityIcons
-              style={{ marginLeft: 8 }}
-              name='email'
+              style={{marginLeft: 8}}
+              name="email"
               size={24}
-              color='black'
+              color="black"
             />
             <TextInput
               value={email}
@@ -128,12 +128,12 @@ const Login = () => {
                 width: 300,
                 fontSize: 16,
               }}
-              placeholder='Enter Email'
+              placeholder="Enter Email"
             />
           </View>
         </View>
-        
-        <View style={{ marginTop: 10 }}>
+
+        <View style={{marginTop: 10}}>
           <View
             style={{
               flexDirection: 'row',
@@ -142,13 +142,12 @@ const Login = () => {
               borderRadius: 5,
               marginTop: 10,
               paddingHorizontal: 10,
-            }}
-          >
-            <MaterialIcons name='password' size={24} color='black' />
+            }}>
+            <MaterialIcons name="password" size={24} color="black" />
 
             <TextInput
               value={password}
-              onChangeText={(text) => setPassword(text)}
+              onChangeText={text => setPassword(text)}
               style={{
                 color: 'grey',
                 marginVertical: 7,
@@ -157,7 +156,7 @@ const Login = () => {
                 marginLeft: 10,
                 flex: 1,
               }}
-              placeholder='Enter Password'
+              placeholder="Enter Password"
               secureTextEntry={!showPassword}
             />
 
@@ -165,7 +164,7 @@ const Login = () => {
               <MaterialCommunityIcons
                 name={showPassword ? 'eye-off' : 'eye'}
                 size={24}
-                color='black'
+                color="black"
               />
             </Pressable>
           </View>
@@ -177,20 +176,18 @@ const Login = () => {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-          }}
-        >
-          <Text></Text>
-          {/* <Text style={{ color: '#007fff', fontWeight: '500' }}>
-            Forgot Password
-          </Text> */}
+          }}>
+  
+         
+          ;
           <Pressable onPress={() => navigation.navigate('ForgotPassword')}>
-            <Text style={{ color: '#007fff', fontWeight: '500' }}>
+            <Text style={{color: '#007fff', fontWeight: '500'}}>
               Forgot Password?
             </Text>
           </Pressable>
         </View>
 
-        <View style={{ marginTop: 50 }} />
+        <View style={{marginTop: 50}} />
 
         <Pressable
           onPress={handleLogin}
@@ -201,23 +198,28 @@ const Login = () => {
             marginLeft: 'auto',
             marginRight: 'auto',
             padding: 15,
-          }}
-        >
-          <Text
-            style={{ textAlign: 'center', fontSize: 18, fontWeight: 'bold' }}
-          >
+          }}>
+          <Text style={{textAlign: 'center', fontSize: 18, fontWeight: 'bold'}}>
             Login
           </Text>
         </Pressable>
 
+       
+
         <Pressable
           onPress={() => navigation.navigate('Register')}
-          style={{ marginTop: 15 }}
-        >
-          <Text style={{ textAlign: 'center' }}>
+          style={{marginTop: 15}}>
+          <Text style={{textAlign: 'center'}}>
             Don't have an account? Sign up
           </Text>
         </Pressable>
+
+        <GoogleSigninButton
+            size={GoogleSigninButton.Size.Wide}
+            color={GoogleSigninButton.Color.Dark}
+            onPress={signIn}
+            //disabled={isInProgress}
+          />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
