@@ -8,6 +8,9 @@ import { UserContext } from './UserContext';
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance } from '@notifee/react-native';
 import { Linking } from 'react-native';
+
+
+
 const App = () => {
   useEffect(() => {
     const requestUserPermission = async () => {
@@ -62,6 +65,15 @@ const App = () => {
     });
     return unsubscribe;
   }, []);
+
+
+
+
+
+
+
+
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
