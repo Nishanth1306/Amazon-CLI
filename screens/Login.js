@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
   StyleSheet,
@@ -15,24 +15,21 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import config from '../src/config.js';
-import {CommonActions} from '@react-navigation/native';
-<<<<<<< HEAD
+import { CommonActions } from '@react-navigation/native';
 import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { signIn } from '../OAuth/signin.ts';
 
 
-=======
-
-import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 GoogleSignin.configure({
   webClientId: '534135288686-c39dv0vl3tfiv6mrpi876ebtadtdsr5c.apps.googleusercontent.com',
   androidClientId: '534135288686-1u2uha26gm8kdtdne0r3ekhcd9uh8u32.apps.googleusercontent.com',
   scopes: ['profile', 'email'],
 });
->>>>>>> 0e03bad458ea318d0d3971c8371694d800c08ab5
+
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +45,7 @@ const Login = () => {
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
-              routes: [{name: 'Main'}],
+              routes: [{ name: 'Main' }],
             }),
           );
         }
@@ -59,27 +56,66 @@ const Login = () => {
     checkLoginStatus();
   }, []);
 
-<<<<<<< HEAD
-=======
+  // const signIn = async () => {
+  //   try {
+  //     await GoogleSignin.hasPlayServices();
+  //     const userInfo = await GoogleSignin.signIn();
+  //     console.log('User Info:', userInfo);
+  //     await fetch(`${config.API_URL}/google-login`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ idToken }),
+  //     });
+
+  //     const data = await response.json();
+  //     navigation.dispatch(
+  //       CommonActions.reset({
+  //         index: 0,
+  //         routes: [{ name: 'Main' }],
+  //       }),
+  //     );
+  //   } catch (error) {
+  //     console.error('Google Sign-In error:', error);
+  //   }
+  // };
 
   const signIn = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      console.log('User Info:', userInfo);
+  try {
+    await GoogleSignin.hasPlayServices();
+
+    const userInfo = await GoogleSignin.signIn();
+    console.log('User Info:', userInfo);
+
+    const { idToken } = await GoogleSignin.getTokens();
+    console.log("idToken:", idToken);
+
+    const response = await fetch(`${config.API_URL}/google-login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      await AsyncStorage.setItem('authToken', data.token);
+      await AsyncStorage.setItem('userType', 'registered');
+
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
-          routes: [{name: 'Main'}],
-        }),
+          routes: [{ name: 'Main' }],
+        })
       );
-    } catch (error) {
-      console.error('Google Sign-In error:', error);
+    } else {
+      console.error('Google login backend error:', data.message || 'Unknown error');
     }
-  };
-  
+  } catch (error) {
+    console.error('Google Sign-In error:', error);
+  }
+};
 
->>>>>>> 0e03bad458ea318d0d3971c8371694d800c08ab5
+
   const handleLogin = () => {
     const user = {
       email: email,
@@ -96,7 +132,7 @@ const Login = () => {
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
-            routes: [{name: 'Main'}],
+            routes: [{ name: 'Main' }],
           }),
         );
       })
@@ -110,10 +146,10 @@ const Login = () => {
   };
   return (
     <SafeAreaView
-      style={{flex: 1, backgroundColor: 'white', alignItems: 'center'}}>
+      style={{ flex: 1, backgroundColor: 'white', alignItems: 'center' }}>
       <View>
         <Image
-          style={{width: 150, height: 100, marginTop: 15}}
+          style={{ width: 150, height: 100, marginTop: 15 }}
           source={{
             uri: 'https://assets.stickpng.com/thumbs/6160562276000b00045a7d97.png',
           }}
@@ -122,7 +158,7 @@ const Login = () => {
       </View>
 
       <KeyboardAvoidingView>
-        <View style={{alignItems: 'center'}}>
+        <View style={{ alignItems: 'center' }}>
           <Text
             style={{
               fontSize: 17,
@@ -134,7 +170,7 @@ const Login = () => {
           </Text>
         </View>
 
-        <View style={{marginTop: 70}}>
+        <View style={{ marginTop: 70 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -146,7 +182,7 @@ const Login = () => {
               marginTop: 30,
             }}>
             <MaterialCommunityIcons
-              style={{marginLeft: 8}}
+              style={{ marginLeft: 8 }}
               name="email"
               size={24}
               color="black"
@@ -165,7 +201,7 @@ const Login = () => {
           </View>
         </View>
 
-        <View style={{marginTop: 10}}>
+        <View style={{ marginTop: 10 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -209,17 +245,17 @@ const Login = () => {
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
-  
-         
+
+
           ;
           <Pressable onPress={() => navigation.navigate('ForgotPassword')}>
-            <Text style={{color: '#007fff', fontWeight: '500'}}>
+            <Text style={{ color: '#007fff', fontWeight: '500' }}>
               Forgot Password?
             </Text>
           </Pressable>
         </View>
 
-        <View style={{marginTop: 50}} />
+        <View style={{ marginTop: 50 }} />
 
         <Pressable
           onPress={handleLogin}
@@ -231,34 +267,28 @@ const Login = () => {
             marginRight: 'auto',
             padding: 15,
           }}>
-          <Text style={{textAlign: 'center', fontSize: 18, fontWeight: 'bold'}}>
+          <Text style={{ textAlign: 'center', fontSize: 18, fontWeight: 'bold' }}>
             Login
           </Text>
         </Pressable>
 
-       
+
 
         <Pressable
           onPress={() => navigation.navigate('Register')}
-          style={{marginTop: 15}}>
-          <Text style={{textAlign: 'center'}}>
+          style={{ marginTop: 15 }}>
+          <Text style={{ textAlign: 'center' }}>
             Don't have an account? Sign up
           </Text>
         </Pressable>
 
         <GoogleSigninButton
-<<<<<<< HEAD
-            size={GoogleSigninButton.Size.Wide}
-            color={GoogleSigninButton.Color.Dark}
-            onPress={signIn}
-            //disabled={isInProgress}
-          />
-=======
-        size={GoogleSigninButton.Size.Wide}
-        color={GoogleSigninButton.Color.Dark}
-        onPress={signIn}
-      />
->>>>>>> 0e03bad458ea318d0d3971c8371694d800c08ab5
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
+          onPress={signIn}
+        //disabled={isInProgress}
+        />
+
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

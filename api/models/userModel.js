@@ -1,14 +1,5 @@
 import mongoose from "mongoose";
 
-// //name: String,
-// mobileNo: String,
-// houseNo: String,
-// street: String,
-// landmark: String,
-// city: String,
-// country: String,
-// postalCode: String,
-
 const addressSchema = new mongoose.Schema({
   name:{
     type: String,
@@ -97,13 +88,13 @@ resetPasswordExpires: Date,
     type: String,
     required: true,
     minlength: 6,
-    validate: {
-      validator: function (password) {
-        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&()_\-])[A-Za-z\d@$!%*?&()_\-]{6,}$/.test(password);
-      },
-      message:
-        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (e.g. @$!%*?&()_-)",
-    }
+    // validate: {
+    //   validator: function (password) {
+    //     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&()_\-])[A-Za-z\d@$!%*?&()_\-]{6,}$/.test(password);
+    //   },
+    //   message:
+    //     "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (e.g. @$!%*?&()_-)",
+    // }
     
   },
   fcmToken: {
@@ -134,7 +125,7 @@ resetPasswordExpires: Date,
     },
       description: {
         type: String,
-        required: true,
+        required: false,
       },
       price: {
         type: String,

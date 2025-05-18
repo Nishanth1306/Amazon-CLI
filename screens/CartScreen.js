@@ -12,51 +12,50 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import React,{useState} from 'react';
+import React, { useState,useContext, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { 
-  decrementQuantity, 
-  incrementQuantity, 
+import {
+  decrementQuantity,
+  incrementQuantity,
   removeFromCart,
-  cleanCart 
+  cleanCart
 } from '../redux/CartReducer';
 import { useNavigation } from '@react-navigation/native';
 import Wishlist from '../components/Wishlist';
+import { addToWish } from '../redux/WishReducer.js';
+import axios from 'axios';
+
+import {UserType} from '../UserContext';
+import config from '../src/config.js';
 
 
 const CartScreen = () => {
+  const {userId, setUserId} = useContext(UserType);
   const cart = useSelector((state) => state.cart.cart);
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
 
-  // const calculateTotal = () => {
-  //   return cart.reduce((total, item) => {
-  //     const price = parseFloat(item?.price?.replace(/[^0-9.]/g, '')) || 0;
-  //     return total + (price * item.quantity);
-  //   }, 0).toFixed(2);
-  // };
-
   const calculateTotal = () => {
     return cart
       .reduce((total, item) => {
         let price = 0;
-  
+
         if (typeof item.price === 'string') {
           price = parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0;
         } else if (typeof item.price === 'number') {
           price = item.price;
         }
-  
+
         return total + price * item.quantity;
       }, 0)
       .toFixed(2);
   };
-  
+
   const total = calculateTotal();
 
   const handleIncreaseQuantity = (item) => {
-    if (item.quantity < 10) { 
+    if (item.quantity < 10) {
       dispatch(incrementQuantity(item));
     } else {
       Alert.alert('Maximum quantity reached', 'You can add up to 10 of this item');
@@ -113,9 +112,56 @@ const CartScreen = () => {
     );
   };
 
-  const handleSaveForLater = (item) => {
-    Alert.alert('Feature coming soon', 'Save for later functionality will be added soon');
-  };
+  const handleSaveForLater = async (item) => {
+  try {
+    setLoading(true);
+    dispatch(addToWish(item));
+    dispatch(removeFromCart(item));
+    const response = await axios.post(`${config.API_URL}/user/${userId}/wishlist`, {
+      name: item.title || item.name || 'No Title',
+      id: item.id,
+      description: item.size || '',
+      price: item.price,
+      color: item.color || '',
+      image: item.carouselImages?.[0] || item.image || '',
+    });
+
+    console.log('Item saved to wishlist:', response.data);
+  } catch (error) {
+    console.error('Error saving item:', error.response?.data || error.message);
+    dispatch(removeFromWish(item.id));
+    dispatch(addToCart(item)); 
+    Alert.alert('Error', 'Failed to move product. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+// const handleSaveForLater = async (item) => {
+//   try {
+//     console.log('Saving item:', item);
+//     const response = await axios.post(`${config.API_URL}/user/${userId}/wishlist`, {
+//       name: item.title || item.name || 'No Title',
+//       id: item.id,
+//       description: item.size || '',
+//       price: item.price,
+//       color: item.color || '',
+//       image: item.carouselImages?.[0] || item.image || '',
+//     });
+//     dispatch(addToWish(item));
+//     dispatch(removeFromCart(item));
+//     console.log('Item dispatched to wishlist');
+
+//     console.log('Save for later response:', response.status, response.data);
+//   } catch (error) {
+//     console.error('Error saving item to wishlist:', error?.response?.data || error.message);
+//     Alert.alert('Error', 'Failed to move product');
+//   }
+// };
+
+// useEffect(()=>{
+//   handleSaveForLater()
+// },[])
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -123,8 +169,8 @@ const CartScreen = () => {
         <View style={styles.searchBar}>
           <View style={styles.searchInput}>
             <AntDesign name="search1" size={20} color="#666" />
-            <TextInput 
-              placeholder="Search Amazon.in" 
+            <TextInput
+              placeholder="Search Amazon.in"
               style={styles.searchTextInput}
               placeholderTextColor="#666"
             />
@@ -134,17 +180,17 @@ const CartScreen = () => {
           </Pressable>
         </View>
 
-    
+
         <View style={styles.priceSummary}>
           <Text style={styles.priceText}>
-            Subtotal ({cart.length} items): 
+            Subtotal ({cart.length} items):
             <Text style={styles.priceAmount}> ₹{total}</Text>
           </Text>
           <Text style={styles.emiText}>EMI options available</Text>
         </View>
 
-   
-        <Pressable 
+
+        <Pressable
           onPress={handleProceedToBuy}
           style={[styles.actionButton, styles.proceedButton]}
         >
@@ -152,7 +198,7 @@ const CartScreen = () => {
         </Pressable>
 
         {cart.length > 0 && (
-          <Pressable 
+          <Pressable
             onPress={handleClearCart}
             style={[styles.actionButton, styles.clearCartButton]}
           >
@@ -162,12 +208,12 @@ const CartScreen = () => {
 
         <View style={styles.divider} />
 
-      
+
         {cart.length === 0 ? (
           <View style={styles.emptyCartContainer}>
             <MaterialIcons name="remove-shopping-cart" size={60} color="#ccc" />
             <Text style={styles.emptyCartText}>Your Amazon Cart is empty</Text>
-            <Pressable 
+            <Pressable
               style={styles.shopButton}
               onPress={() => navigation.navigate('Home')}
             >
@@ -177,7 +223,7 @@ const CartScreen = () => {
         ) : (
           cart.map((item, index) => (
             <View key={`${item.id}_${index}`} style={styles.cartItemContainer}>
-            
+
               <View style={styles.productInfo}>
                 <Image
                   source={{ uri: item.image }}
@@ -194,38 +240,38 @@ const CartScreen = () => {
                 </View>
               </View>
 
-              
+
               <View style={styles.quantityContainer}>
                 <View style={styles.quantityControls}>
                   {item.quantity > 1 ? (
-                    <Pressable 
+                    <Pressable
                       onPress={() => handleDecreaseQuantity(item)}
                       style={styles.quantityButton}
                     >
                       <AntDesign name="minus" size={16} color="black" />
                     </Pressable>
                   ) : (
-                    <Pressable 
+                    <Pressable
                       onPress={() => handleRemoveItem(item)}
                       style={styles.quantityButton}
                     >
                       <AntDesign name="delete" size={16} color="black" />
                     </Pressable>
                   )}
-                  
+
                   <View style={styles.quantityDisplay}>
                     <Text>{item.quantity}</Text>
                   </View>
-                  
-                  <Pressable 
+
+                  <Pressable
                     onPress={() => handleIncreaseQuantity(item)}
                     style={styles.quantityButton}
                   >
                     <AntDesign name="plus" size={16} color="black" />
                   </Pressable>
                 </View>
-                
-                <Pressable 
+
+                <Pressable
                   onPress={() => handleRemoveItem(item)}
                   style={styles.deleteButton}
                 >
@@ -233,15 +279,15 @@ const CartScreen = () => {
                 </Pressable>
               </View>
 
-              
+
               <View style={styles.optionsContainer}>
-                <Pressable 
+                <Pressable
                   onPress={() => handleSaveForLater(item)}
                   style={styles.optionButton}
                 >
                   <Text style={styles.optionButtonText}>Save for later</Text>
                 </Pressable>
-                
+
                 <Pressable style={styles.optionButton}>
                   <Text style={styles.optionButtonText}>See more like this</Text>
                 </Pressable>
@@ -250,10 +296,10 @@ const CartScreen = () => {
           ))
         )}
 
-          <>
-            <Text style={styles.sectionTitle}>Your Wishlist</Text>
-            <Wishlist />
-          </>
+        <>
+          <Text style={styles.sectionTitle}>Your Wishlist</Text>
+          <Wishlist />
+        </>
       </ScrollView>
     </SafeAreaView>
   );

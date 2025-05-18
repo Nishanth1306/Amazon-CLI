@@ -11,6 +11,8 @@ import User from "../api/models/userModel.js";
 import Order from "../api/models/order.js";
 import admin from "./firebase.js";
 import cron from 'node-cron';
+import { OAuth2Client } from "google-auth-library";
+
 
 dotenv.config();
 
@@ -18,6 +20,9 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(cors());
+
+const client = new OAuth2Client("534135288686-c39dv0vl3tfiv6mrpi876ebtadtdsr5c.apps.googleusercontent.com")
+
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -32,13 +37,56 @@ app.get("/", (req, res) => {
   res.send("Server is not running");
 });
 
-const IP = "192.168.0.134";
+const IP = "192.168.118.180";
 
 const PORT = 3000;
 
 app.listen(PORT, IP, () => {
   console.log(`Server is running at http://${IP}:${PORT}`);
 });
+
+
+app.post("/google-login", async (req, res) => {
+  const { idToken } = req.body;
+  console.log("id token",idToken)
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: "534135288686-c39dv0vl3tfiv6mrpi876ebtadtdsr5c.apps.googleusercontent.com",
+    });
+
+    const payload = ticket.getPayload(); 
+    const { email, name, picture } = payload;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      
+      user = new User({
+        name,
+        email,
+        verified: true, // Trust Google verified email
+        authType: "google", // Optional: track login method
+      });
+      await user.save();
+      console.log("User Created and Saved");
+    }
+
+    
+    const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: "7d" });
+
+    res.status(200).json({ token, user });
+
+  } catch (error) {
+    console.error("Google login error:", error);
+    res.status(401).json({ message: "Google login failed" });
+  }
+});
+
+
+
+
 
 const sendVerificationEmail = async (email, verificationToken) => {
   const transporter = nodemailer.createTransport({
@@ -87,7 +135,6 @@ const sendForgotPasswordOTPEmail = async (email, otp) => {
   }
 };
 
-
 app.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -105,11 +152,8 @@ app.post("/register", async (req, res) => {
       password: hashedPassword,
       verificationToken: crypto.randomBytes(20).toString("hex"),
     });
-
     await newUser.save();
-
     await sendVerificationEmail(newUser.email, newUser.verificationToken);
-
     res.status(201).json({
       message: "User registered successfully. Please verify your email.",
     });
@@ -375,7 +419,9 @@ app.delete("/addresses/:userId/:addressId", async (req, res) => {
 
 app.post("/user/:userId/wishlist", async (req, res) => {
   const { userId } = req.params;
+  console.log("UserId", userId)
   const { name, id,description, price, color,image } = req.body;
+
   try {
     const user = await User.findById(userId);
     const newProduct = {
@@ -388,8 +434,7 @@ app.post("/user/:userId/wishlist", async (req, res) => {
     };
     console.log(newProduct);
     user.wishlist.push(newProduct);
-    await user.save();
-
+    await user.save()
     res.status(201).json({ message: "Product added to wishlist", wishlist: user.wishlist });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -415,14 +460,11 @@ app.delete('/user/:userId/wishlist/:productId', async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const originalLength = user.wishlist.length;
-
-
     user.wishlist = user.wishlist.filter(item => item.id !== productId);
 
     if (user.wishlist.length === originalLength) {
       return res.status(404).json({ message: 'Product not found in wishlist' });
     }
-
     await user.save();
     res.status(200).json({ message: 'Product removed from wishlist' });
   } catch (error) {
@@ -430,6 +472,7 @@ app.delete('/user/:userId/wishlist/:productId', async (req, res) => {
     res.status(500).json({ message: 'Something went wrong' });
   }
 });
+
 
 app.put('/addresses/:addressId', async (req, res) => {
   const { addressId } = req.params;

@@ -24,6 +24,7 @@ import axios from 'axios';
 import {UserType} from '../UserContext';
 import {Animated, Easing} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { addToWish, removeFromWish } from '../redux/WishReducer.js';
 
 const ProductInfo = () => {
   const scaleAnim = useState(new Animated.Value(1))[0];
@@ -37,7 +38,6 @@ const ProductInfo = () => {
       tension: 40,
     }).start();
   };
-
   const route = useRoute();
   const {width} = Dimensions.get('window');
   const navigation = useNavigation();
@@ -47,6 +47,7 @@ const ProductInfo = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const wishlist = useSelector(state => state.wishlist.wishlist);
 
   const addItemToCart = item => {
     console.log(item)
@@ -84,18 +85,17 @@ const ProductInfo = () => {
       alert(error.message);
     }
   };
-  const handleAddToWishlist = async () => {
+
+ const handleAddToWishlist = async () => {
     const product = route.params;
-  
     try {
       setLoading(true);
       if (isWishlisted) {
         await axios.delete(`${config.API_URL}/user/${userId}/wishlist/${product.id}`);
         setIsWishlisted(false);
-       
       } 
       else {
-       
+        dispatch(addToWish(product));
         await axios.post(`${config.API_URL}/user/${userId}/wishlist`, {
           name: product.title,
           id: product.id,
@@ -104,6 +104,8 @@ const ProductInfo = () => {
           color: product.color,
           image: product.carouselImages[0],
         });
+        
+        
         setIsWishlisted(true);
         animateWishlist();
       }
@@ -113,7 +115,7 @@ const ProductInfo = () => {
   
     setLoading(false);
   };
-  
+
   return (
     <ScrollView>
     <SafeAreaView
