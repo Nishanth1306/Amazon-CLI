@@ -7,11 +7,22 @@ import { ModalPortal } from 'react-native-modals';
 import { UserContext } from './UserContext';
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance } from '@notifee/react-native';
+import { EventType } from '@notifee/react-native';
 import { Linking } from 'react-native';
 
-
-
 const App = () => {
+  useEffect(() => {
+    const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
+      if (type === EventType.PRESS && detail.notification?.data?.url) {
+        Linking.openURL(detail.notification.data.url);
+      }
+    });
+
+    return () => {
+      unsubscribeNotifee();
+    };
+  }, []);
+
   useEffect(() => {
     const requestUserPermission = async () => {
       const authStatus = await messaging().requestPermission();
@@ -32,9 +43,12 @@ const App = () => {
         name: 'Default Channel',
         importance: AndroidImportance.HIGH,
       });
+      
+      
       await notifee.displayNotification({
         title: remoteMessage.notification?.title || 'Notification',
         body: remoteMessage.notification?.body || 'You have a new message',
+        data: remoteMessage.data || {}, 
         android: {
           channelId,
           pressAction: {
@@ -46,33 +60,28 @@ const App = () => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       console.log('Foreground FCM message:', remoteMessage);
       await displayNotification(remoteMessage);
+  
     });
-    requestUserPermission();
-    return unsubscribe;
-  }, []);
-  useEffect(() => {
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage?.data?.url) {
-          Linking.openURL(remoteMessage.data.url);
-        }
-      });
-    const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
+
+    messaging().getInitialNotification().then(remoteMessage => {
       if (remoteMessage?.data?.url) {
         Linking.openURL(remoteMessage.data.url);
       }
     });
-    return unsubscribe;
+
+    const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(remoteMessage => {
+      if (remoteMessage?.data?.url) {
+        Linking.openURL(remoteMessage.data.url);
+      }
+    });
+
+    requestUserPermission();
+    
+    return () => {
+      unsubscribe();
+      unsubscribeOpenedApp();
+    };
   }, []);
-
-
-
-
-
-
-
-
 
   return (
     <Provider store={store}>
