@@ -1,22 +1,10 @@
-import {
-  Image,
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  Pressable,
-  SafeAreaView,
-} from 'react-native';
+import {Image,StyleSheet,View,} from 'react-native';
 import React, { useLayoutEffect, useEffect, useContext, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-
-
 import axios from 'axios';
 import { UserType } from '../UserContext';
-
 import config from '../src/config.js';
 import UserProfile from '../components/UserProfile.js';
 import GuestProfile from '../components/GuestProfile.js';

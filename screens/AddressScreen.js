@@ -90,12 +90,13 @@ const AddressScreen = () => {
         city:"",
         postalCode: ""
       });
-      
       setTimeout(() => navigation.goBack(), 500);
-    } catch (error) {
+    } 
+    catch (error) {
       console.error("Error adding address:", error);
       Alert.alert("Error", "Failed to add address. Please try again.");
-    } finally {
+    } 
+    finally {
       setIsLoading(false);
     }
   };

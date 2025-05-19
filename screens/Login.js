@@ -13,15 +13,12 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import config from '../src/config.js';
 import { CommonActions } from '@react-navigation/native';
 import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { signIn } from '../OAuth/signin.ts';
-
-
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 GoogleSignin.configure({
@@ -56,28 +53,6 @@ const Login = () => {
     checkLoginStatus();
   }, []);
 
-  // const signIn = async () => {
-  //   try {
-  //     await GoogleSignin.hasPlayServices();
-  //     const userInfo = await GoogleSignin.signIn();
-  //     console.log('User Info:', userInfo);
-  //     await fetch(`${config.API_URL}/google-login`, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ idToken }),
-  //     });
-
-  //     const data = await response.json();
-  //     navigation.dispatch(
-  //       CommonActions.reset({
-  //         index: 0,
-  //         routes: [{ name: 'Main' }],
-  //       }),
-  //     );
-  //   } catch (error) {
-  //     console.error('Google Sign-In error:', error);
-  //   }
-  // };
 
   const signIn = async () => {
   try {
@@ -107,7 +82,9 @@ const Login = () => {
           routes: [{ name: 'Main' }],
         })
       );
-    } else {
+    }
+    
+    else {
       console.error('Google login backend error:', data.message || 'Unknown error');
     }
   } catch (error) {
@@ -246,8 +223,6 @@ const Login = () => {
             justifyContent: 'space-between',
           }}>
 
-
-          ;
           <Pressable onPress={() => navigation.navigate('ForgotPassword')}>
             <Text style={{ color: '#007fff', fontWeight: '500' }}>
               Forgot Password?

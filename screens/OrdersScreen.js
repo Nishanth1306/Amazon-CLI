@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  ActivityIndicator, 
+  Image,
+  FlatList
+} from 'react-native';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
 import config from '../src/config.js';
@@ -15,14 +23,18 @@ const OrdersScreen = () => {
     const fetchOrders = async () => {
       try {
         const { data } = await axios.get(`${config.API_URL}/orders/${userId}`);
-        console.log("Data ",data);
-        const sortedOrders = (data.orders || []).sort((a, b) => {
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        });
+        
+        if (data.orders?.[0]?.products?.[0]) {
+          console.log('Sample product data:', data.orders[0].products[0]);
+        }
+        const sortedOrders = (data.orders || []).sort((a, b) => 
+          new Date(b.createdAt) - new Date(a.createdAt)
+        );
         setOrders(sortedOrders);
-        setLoading(false);
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch orders');
+        console.error("Order fetch error:", err);
+        setError(err.response?.data?.message || 'Failed to load orders');
+      } finally {
         setLoading(false);
       }
     };
@@ -30,30 +42,55 @@ const OrdersScreen = () => {
     fetchOrders();
   }, [userId]);
 
+  const formatPrice = (price) => {
+    if (!price) return '0.00';
+    return parseFloat(price.toString().replace(/[^\d.]/g, '')).toFixed(2);
+  };
+
+  const renderProductItem = ({ item }) => (
+    <View style={styles.productItem}>
+      <Image
+        source={{ uri: item.image || 'https://via.placeholder.com/80' }}
+        style={styles.productImage}
+        onError={() => console.log('Image load failed')}
+      />
+      <View style={styles.productInfo}>
+        <Text style={styles.productTitle} numberOfLines={2}>
+          {item.title || 'No product name'}
+        </Text>
+        <Text style={styles.productPrice}>
+          ₹{formatPrice(item.price)}
+        </Text>
+        <Text style={styles.productQuantity}>
+          Quantity: {item.quantity || 1}
+        </Text>
+      </View>
+    </View>
+  );
+
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.error}>{error}</Text>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
 
-  if (!orders || orders.length === 0) {
+  if (!orders.length) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.title}>No orders found</Text>
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No orders found</Text>
       </View>
     );
   }
-
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Your Orders</Text>
@@ -61,71 +98,53 @@ const OrdersScreen = () => {
       {orders.map((order) => (
         <View key={order._id} style={styles.orderCard}>
           <View style={styles.orderHeader}>
-            <Text style={styles.orderId}>Order #: {order._id.substring(18, 24).toUpperCase()}</Text>
+            <Text style={styles.orderId}>
+              Order #{order._id?.substring(18, 24).toUpperCase()}
+            </Text>
             <View style={[
-              styles.statusBadge,
+              styles.paymentBadge,
               { backgroundColor: order.paymentMethod === 'cash' ? '#FFA000' : '#4CAF50' }
             ]}>
-              <Text style={styles.statusText}>
-                {order.paymentMethod === 'cash' ? 'Cash on Delivery' : 'Paid Online'}
+              <Text style={styles.paymentText}>
+                {order.paymentMethod === 'cash' ? 'COD' : 'Paid'}
               </Text>
             </View>
           </View>
-          
-          <Text style={styles.orderText}>
-            Order Date: {new Date(order.createdAt).toLocaleDateString('en-US', {
+
+          <Text style={styles.orderDate}>
+            {new Date(order.createdAt).toLocaleDateString('en-US', {
               year: 'numeric',
-              month: 'long',
+              month: 'short',
               day: 'numeric',
               hour: '2-digit',
               minute: '2-digit'
             })}
           </Text>
-          
-          <Text style={styles.sectionTitle}>Customer Details:</Text>
-          <Text style={styles.orderText}>Name: {order.user?.name}</Text>
-          <Text style={styles.orderText}>Email: {order.user?.email}</Text>
-          
           <Text style={styles.sectionTitle}>Shipping Address:</Text>
-          <Text style={styles.orderText}>Name: {order.shippingAddress.name}</Text>
-          <Text style={styles.orderText}>Mobile: {order.shippingAddress.mobileNo}</Text>
-          <Text style={styles.orderText}>
-            Address: {order.shippingAddress.houseNo}, {order.shippingAddress.street}
-          </Text>
-          <Text style={styles.orderText}>Landmark: {order.shippingAddress.landmark}</Text>
-          <Text style={styles.orderText}>Postal Code: {order.shippingAddress.postalCode}</Text>
-          
-          <Text style={styles.sectionTitle}>Payment Method:</Text>
-          <Text style={styles.orderText}>
-            {order.paymentMethod === 'cash' ? 'Cash on Delivery' : 'Online Payment'}
-          </Text>
-          
-          <Text style={styles.sectionTitle}>Products:</Text>
-           {order.products && order.products.length > 0 ? (
-            order.products.map((product, index) => (
-              <View key={index} style={styles.productItem}>
-                {product.image && (
-                  <Image 
-                    source={{ uri: product.image }} 
-                    style={styles.productImage} 
-                    resizeMode="contain"
-                  />
-                )}
-                <View style={styles.productDetails}>
-                  <Text style={styles.productName}>{product?.title}</Text>
-                  <Text style={styles.productPrice}>Price: {product?.price || '0.00'}</Text>
-                  <Text style={styles.productQuantity}>Quantity: {product.quantity || 1}</Text>
-                  {product.color && <Text style={styles.productColor}>Color: {product.color}</Text>}
-                </View>
-              </View>
-            ))
+          <View style={styles.addressBox}>
+            <Text style={styles.addressText}>{order.shippingAddress?.name}</Text>
+            <Text style={styles.addressText}>Phone: {order.shippingAddress?.mobileNo}</Text>
+            <Text style={styles.addressText}>
+              {order.shippingAddress?.houseNo}, {order.shippingAddress?.street}
+            </Text>
+            <Text style={styles.addressText}>Landmark: {order.shippingAddress?.landmark}</Text>
+            <Text style={styles.addressText}>Postal Code: {order.shippingAddress?.postalCode}</Text>
+          </View>
+          <Text style={styles.sectionTitle}>Products ({order.products?.length || 0}):</Text>
+          {order.products?.length > 0 ? (
+            <FlatList
+              data={order.products}
+              renderItem={renderProductItem}
+              keyExtractor={(item, index) => item._id || `product-${index}`}
+              scrollEnabled={false}
+            />
           ) : (
             <Text style={styles.noProductsText}>No products in this order</Text>
           )}
-            <View style={styles.summaryRow}>
-             <Text style={styles.summaryLabel}>Total Price:</Text>
-             <Text style={styles.summaryValue}>₹{order.totalPrice || order.price }</Text>
-           </View>
+          <View style={styles.totalContainer}>
+            <Text style={styles.totalLabel}>Order Total:</Text>
+            <Text style={styles.totalAmount}>₹{formatPrice(order.totalPrice)}</Text>
+          </View>
         </View>
       ))}
     </ScrollView>
@@ -135,10 +154,21 @@ const OrdersScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 15,
     backgroundColor: '#f5f5f5',
   },
-  center: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -150,114 +180,125 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   orderCard: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 3,
   },
   orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
     alignItems: 'center',
+    marginBottom: 10,
   },
   orderId: {
-    fontWeight: 'bold',
     fontSize: 16,
+    fontWeight: '600',
     color: '#444',
-    flex: 1,
   },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: 'white',
-    fontSize: 12,
-  },
-  orderText: {
-    marginBottom: 6,
+  orderDate: {
     fontSize: 14,
-    color: '#555',
+    color: '#666',
+    marginBottom: 15,
+  },
+  paymentBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+  },
+  paymentText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   sectionTitle: {
-    fontWeight: 'bold',
-    marginTop: 12,
-    marginBottom: 8,
     fontSize: 16,
+    fontWeight: '600',
+    marginTop: 10,
+    marginBottom: 8,
     color: '#333',
+  },
+  addressBox: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
+  },
+  addressText: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 4,
   },
   productItem: {
     flexDirection: 'row',
-    marginBottom: 12,
-    paddingBottom: 12,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   productImage: {
     width: 80,
     height: 80,
-    borderRadius: 4,
+    borderRadius: 8,
     marginRight: 12,
+    backgroundColor: '#f0f0f0',
   },
-  productDetails: {
+  productInfo: {
     flex: 1,
+    justifyContent: 'center',
   },
-  productName: {
-    fontWeight: 'bold',
+  productTitle: {
     fontSize: 15,
-    marginBottom: 4,
+    fontWeight: '500',
+    marginBottom: 6,
+    color: '#222',
   },
   productPrice: {
-    color: '#E91E63',
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#e53935',
     marginBottom: 4,
   },
   productQuantity: {
-    color: '#555',
-    marginBottom: 4,
-  },
-  productSize: {
-    color: '#555',
-    marginBottom: 4,
-  },
-  productColor: {
-    color: '#555',
+    fontSize: 14,
+    color: '#666',
   },
   noProductsText: {
     color: '#888',
     fontStyle: 'italic',
-    marginBottom: 12,
+    textAlign: 'center',
+    marginVertical: 15,
   },
-  summaryRow: {
+  totalContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 12,
-    paddingTop: 12,
+    marginTop: 15,
+    paddingTop: 15,
     borderTopWidth: 1,
     borderTopColor: '#eee',
   },
-  summaryLabel: {
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-  summaryValue: {
-    fontWeight: 'bold',
+  totalLabel: {
     fontSize: 16,
-    color: '#E91E63',
+    fontWeight: '600',
+    color: '#333',
   },
-  error: {
-    color: 'red',
+  totalAmount: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#e53935',
+  },
+  errorText: {
+    color: '#e53935',
     fontSize: 16,
+    textAlign: 'center',
   },
-  title: {
+  emptyText: {
     fontSize: 18,
-    color: '#555',
+    color: '#888',
   },
 });
 

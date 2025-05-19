@@ -50,7 +50,6 @@ const ProductInfo = () => {
   const wishlist = useSelector(state => state.wishlist.wishlist);
 
   const addItemToCart = item => {
-    console.log(item)
     setAddedToCart(true);
     dispatch(addToCart(item));
     setTimeout(() => {
@@ -166,8 +165,6 @@ const ProductInfo = () => {
               </View>
             </View>
 
-
-
             <Animated.View style={[styles.heartIcon, { transform: [{ scale: scaleAnim }] }]}>
               <Pressable onPress={handleAddToWishlist} disabled={loading}>
                 <AntDesign
@@ -221,10 +218,8 @@ const ProductInfo = () => {
         <Text>{addedToCart ? 'Added to Cart' : 'Add to Cart'}</Text>
       </Pressable>
 
-    
-
       <Pressable
-        onPress={() => navigation.navigate('ConfirmationScreen',route?.params?.item)}
+        onPress={() => navigation.navigate('ConfirmationScreen',addItemToCart(route?.params?.item))}
         style={styles.buyNowButton}>
         <Text>Buy Now</Text>
       </Pressable>

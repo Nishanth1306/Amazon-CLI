@@ -23,7 +23,7 @@ const ProductListScreen = () => {
   const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const BASE_URL = 'http://192.168.126.60:5000';
+  const BASE_URL = 'http://192.168.0.134:5000';
 
   const fetchAllProducts = async () => {
     try {
@@ -93,14 +93,10 @@ const ProductListScreen = () => {
       </Text>
       </TouchableOpacity> 
     </View>
-    
-   
   );
-
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" style={{ flex: 1 }} />;
   }
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
     <View style={{ flex: 1 }}>
@@ -127,32 +123,7 @@ const ProductListScreen = () => {
         contentContainerStyle={styles.container}
       />
     </View>
-  </SafeAreaView>
-   
-    // <View style={{ flex: 1 }}>
-    //   <View style={styles.searchBar}>
-    //     <View style={styles.searchInput}>
-    //       <AntDesign name="search1" size={24} color="black" />
-    //       <TextInput
-    //         placeholder="Search products..."
-    //         value={keyword}
-    //         onChangeText={searchProducts}
-    //         style={{ flex: 1 }}
-    //       />
-    //     </View>
-
-    //     <TouchableOpacity >
-    //       <Entypo name="mic" size={24} color="black" onPress={handleMicPress}/>
-    //     </TouchableOpacity>
-    //   </View>
-    //   <FlatList
-    //     data={filtered}
-    //     keyExtractor={item => item._id}
-    //     renderItem={renderItem}
-    //     contentContainerStyle={styles.container}
-    //   />
-    // </View>
-   
+  </SafeAreaView>   
   );
 };
 
@@ -188,7 +159,6 @@ const styles = StyleSheet.create({
     padding: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    // marginTop: Platform.OS === 'android' ? 40 : 0,
   },
   searchInput: {
     flexDirection: 'row',

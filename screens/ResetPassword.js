@@ -7,7 +7,6 @@ const ResetPassword = ({ route, navigation }) => {
   const { email } = route.params;
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
-
   const handleResetPassword = async () => {
     try {
       const res = await axios.post(`${config.API_URL}/reset-password`, {

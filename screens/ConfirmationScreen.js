@@ -6,13 +6,13 @@ import {
   Pressable,
   Alert,
 } from 'react-native';
-import React, {useState, useEffect, useContext} from 'react';
-import {useFocusEffect} from '@react-navigation/native';
+import React, { useState, useEffect, useContext } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
-import {UserType} from '../UserContext';
-import {useDispatch, useSelector} from 'react-redux';
-import {cleanCart} from '../redux/CartReducer';
-import {useNavigation,useRoute} from '@react-navigation/native';
+import { UserType } from '../UserContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { cleanCart } from '../redux/CartReducer';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
 import config from '../src/config.js';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -24,26 +24,26 @@ const ConfirmationScreen = () => {
   const route = useRoute();
   const [addressModalVisible, setAddressModalVisible] = useState(false);
   const steps = [
-    {title: 'Address', content: 'Address Form'},
-    {title: 'Delivery', content: 'Delivery Options'},
-    {title: 'Payment', content: 'Payment Details'},
-    {title: 'Place Order', content: 'Order Summary'},
+    { title: 'Address', content: 'Address Form' },
+    { title: 'Delivery', content: 'Delivery Options' },
+    { title: 'Payment', content: 'Payment Details' },
+    { title: 'Place Order', content: 'Order Summary' },
   ];
   const navigation = useNavigation();
   const [currentStep, setCurrentStep] = useState(0);
   const [addresses, setAddresses] = useState([]);
-  const {userId, setUserId} = useContext(UserType);
+  const { userId, setUserId } = useContext(UserType);
   const cart = useSelector(state => state.cart.cart);
   const total = cart
-  .map(item => {
-    const priceValue =
-      typeof item.price === 'string'
-        ? Number(item.price.replace(/[^0-9.]/g, '')) 
-        : item.price;
+    .map(item => {
+      const priceValue =
+        typeof item.price === 'string'
+          ? Number(item.price.replace(/[^0-9.]/g, ''))
+          : item.price;
 
-    return priceValue * item.quantity;
-  })
-  .reduce((curr, prev) => curr + prev, 0);
+      return priceValue * item.quantity;
+    })
+    .reduce((curr, prev) => curr + prev, 0);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -53,7 +53,7 @@ const ConfirmationScreen = () => {
   const fetchAddresses = async () => {
     try {
       const response = await axios.get(`${config.API_URL}/addresses/${userId}`);
-      const {addresses} = response.data;
+      const { addresses } = response.data;
 
       setAddresses(addresses);
     } catch (error) {
@@ -94,7 +94,7 @@ const ConfirmationScreen = () => {
       );
       if (response.status === 200) {
         Alert.alert('Success', 'Address removed successfully');
-        fetchAddresses(); 
+        fetchAddresses();
       } else {
         Alert.alert('Error', 'Failed to remove address');
       }
@@ -117,7 +117,7 @@ const ConfirmationScreen = () => {
           contact: '9191919191',
           name: 'RazorPay Software',
         },
-        theme: {color: '#F37254'},
+        theme: { color: '#F37254' },
       };
       const data = await RazorpayCheckout.open(options);
 
@@ -143,7 +143,7 @@ const ConfirmationScreen = () => {
   };
   return (
     <ScrollView>
-      <View style={{flex: 1, paddingHorizontal: 20, paddingTop: 40}}>
+      <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 40 }}>
         <View
           style={{
             flexDirection: 'row',
@@ -152,12 +152,12 @@ const ConfirmationScreen = () => {
             justifyContent: 'space-between',
           }}>
           {steps?.map((step, index) => (
-            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
               {index > 0 && (
                 <View
                   style={[
-                    {flex: 1, height: 2, backgroundColor: 'green'},
-                    index <= currentStep && {backgroundColor: 'green'},
+                    { flex: 1, height: 2, backgroundColor: 'green' },
+                    index <= currentStep && { backgroundColor: 'green' },
                   ]}
                 />
               )}
@@ -171,21 +171,21 @@ const ConfirmationScreen = () => {
                     justifyContent: 'center',
                     alignItems: 'center',
                   },
-                  index < currentStep && {backgroundColor: 'green'},
+                  index < currentStep && { backgroundColor: 'green' },
                 ]}>
                 {index < currentStep ? (
                   <Text
-                    style={{fontSize: 16, fontWeight: 'bold', color: 'white'}}>
+                    style={{ fontSize: 16, fontWeight: 'bold', color: 'white' }}>
                     &#10003;
                   </Text>
                 ) : (
                   <Text
-                    style={{fontSize: 16, fontWeight: 'bold', color: 'white'}}>
+                    style={{ fontSize: 16, fontWeight: 'bold', color: 'white' }}>
                     {index + 1}
                   </Text>
                 )}
               </View>
-              <Text style={{textAlign: 'center', marginTop: 8}}>
+              <Text style={{ textAlign: 'center', marginTop: 8 }}>
                 {step.title}
               </Text>
             </View>
@@ -198,16 +198,15 @@ const ConfirmationScreen = () => {
         onClose={() => setAddressModalVisible(false)}
         onAddressSelect={address => setSelectedAddress(address)}
       />
-
-      <Pressable
-      style={{marginLeft:20,marginBottom:20}}
-       onPress={() => setAddressModalVisible(true)}>
-        <Text>Click to Add New Address</Text>
-      </Pressable>
-
       {currentStep == 0 && (
-        <View style={{marginHorizontal: 20}}>
-          <Text style={{fontSize: 16, fontWeight: 'bold'}}>
+
+        <View style={{ marginHorizontal: 20 }}>
+          <Pressable
+            style={styles.buyNowButton}
+            onPress={() => setAddressModalVisible(true)}>
+            <Text>Click to Add New Address</Text>
+          </Pressable>
+          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
             Select Delivery Address
           </Text>
 
@@ -236,35 +235,35 @@ const ConfirmationScreen = () => {
                   />
                 )}
 
-                <View style={{marginLeft: 6}}>
+                <View style={{ marginLeft: 6 }}>
                   <View
                     style={{
                       flexDirection: 'row',
                       alignItems: 'center',
                       gap: 3,
                     }}>
-                    <Text style={{fontSize: 15, fontWeight: 'bold'}}>
+                    <Text style={{ fontSize: 15, fontWeight: 'bold' }}>
                       {item?.name}
                     </Text>
                     <Entypo name="location-pin" size={24} color="red" />
                   </View>
 
-                  <Text style={{fontSize: 15, color: '#181818'}}>
+                  <Text style={{ fontSize: 15, color: '#181818' }}>
                     {item?.houseNo}, {item?.landmark}
                   </Text>
 
-                  <Text style={{fontSize: 15, color: '#181818'}}>
+                  <Text style={{ fontSize: 15, color: '#181818' }}>
                     {item?.street}
                   </Text>
 
-                  <Text style={{fontSize: 15, color: '#181818'}}>
+                  <Text style={{ fontSize: 15, color: '#181818' }}>
                     India, Bangalore
                   </Text>
 
-                  <Text style={{fontSize: 15, color: '#181818'}}>
+                  <Text style={{ fontSize: 15, color: '#181818' }}>
                     phone No : {item?.mobileNo}
                   </Text>
-                  <Text style={{fontSize: 15, color: '#181818'}}>
+                  <Text style={{ fontSize: 15, color: '#181818' }}>
                     pin code : {item?.postalCode}
                   </Text>
 
@@ -276,7 +275,7 @@ const ConfirmationScreen = () => {
                       marginTop: 7,
                     }}>
                     <Pressable
-                    onPress={() => {navigation.navigate('EditAddress', {address: item})}}
+                      onPress={() => { navigation.navigate('EditAddress', { address: item }) }}
                       style={{
                         backgroundColor: '#F5F5F5',
                         paddingHorizontal: 10,
@@ -326,7 +325,7 @@ const ConfirmationScreen = () => {
                           alignItems: 'center',
                           marginTop: 10,
                         }}>
-                        <Text style={{textAlign: 'center', color: 'white'}}>
+                        <Text style={{ textAlign: 'center', color: 'white' }}>
                           Deliver to this Address
                         </Text>
                       </Pressable>
@@ -340,8 +339,8 @@ const ConfirmationScreen = () => {
       )}
 
       {currentStep == 1 && (
-        <View style={{marginHorizontal: 20}}>
-          <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+        <View style={{ marginHorizontal: 20 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
             Choose your delivery options
           </Text>
 
@@ -367,8 +366,8 @@ const ConfirmationScreen = () => {
               />
             )}
 
-            <Text style={{flex: 1}}>
-              <Text style={{color: 'green', fontWeight: '500'}}>
+            <Text style={{ flex: 1 }}>
+              <Text style={{ color: 'green', fontWeight: '500' }}>
                 Tomorrow by 10pm
               </Text>{' '}
               - FREE delivery with your Prime membership
@@ -391,8 +390,8 @@ const ConfirmationScreen = () => {
       )}
 
       {currentStep == 2 && (
-        <View style={{marginHorizontal: 20}}>
-          <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+        <View style={{ marginHorizontal: 20 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
             Select your payment Method
           </Text>
 
@@ -473,8 +472,8 @@ const ConfirmationScreen = () => {
       )}
 
       {currentStep === 3 && selectedOption === 'cash' && (
-        <View style={{marginHorizontal: 20}}>
-          <Text style={{fontSize: 20, fontWeight: 'bold'}}>Order Now</Text>
+        <View style={{ marginHorizontal: 20 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Order Now</Text>
 
           <View
             style={{
@@ -489,10 +488,10 @@ const ConfirmationScreen = () => {
               marginTop: 10,
             }}>
             <View>
-              <Text style={{fontSize: 17, fontWeight: 'bold'}}>
+              <Text style={{ fontSize: 17, fontWeight: 'bold' }}>
                 Save 5% and never run out
               </Text>
-              <Text style={{fontSize: 15, color: 'gray', marginTop: 5}}>
+              <Text style={{ fontSize: 15, color: 'gray', marginTop: 5 }}>
                 Turn on auto deliveries
               </Text>
             </View>
@@ -521,11 +520,11 @@ const ConfirmationScreen = () => {
                 justifyContent: 'space-between',
                 marginTop: 8,
               }}>
-              <Text style={{fontSize: 16, fontWeight: '500', color: 'gray'}}>
+              <Text style={{ fontSize: 16, fontWeight: '500', color: 'gray' }}>
                 Items
               </Text>
 
-              <Text style={{color: 'gray', fontSize: 16}}>{cart.length || 1}</Text>
+              <Text style={{ color: 'gray', fontSize: 16 }}>{cart.length || 1}</Text>
             </View>
 
             <View
@@ -535,10 +534,10 @@ const ConfirmationScreen = () => {
                 justifyContent: 'space-between',
                 marginTop: 8,
               }}>
-              <Text style={{fontSize: 16, fontWeight: '500', color: 'gray'}}>
+              <Text style={{ fontSize: 16, fontWeight: '500', color: 'gray' }}>
                 Delivery
               </Text>
-              <Text style={{color: 'gray', fontSize: 16}}>₹0</Text>
+              <Text style={{ color: 'gray', fontSize: 16 }}>₹0</Text>
             </View>
             <View
               style={{
@@ -547,14 +546,14 @@ const ConfirmationScreen = () => {
                 justifyContent: 'space-between',
                 marginTop: 8,
               }}>
-              <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
                 Order Total
               </Text>
-              
+
               <Text
-                style={{color: '#C60C30', fontSize: 17, fontWeight: 'bold'}}>
+                style={{ color: '#C60C30', fontSize: 17, fontWeight: 'bold' }}>
                 ₹{total || parseFloat(route.params?.price.replace(/[^0-9.]/g, ''))}
-                
+
               </Text>
             </View>
           </View>
@@ -567,9 +566,9 @@ const ConfirmationScreen = () => {
               borderWidth: 1,
               marginTop: 10,
             }}>
-            <Text style={{fontSize: 16, color: 'gray'}}>Pay With</Text>
+            <Text style={{ fontSize: 16, color: 'gray' }}>Pay With</Text>
 
-            <Text style={{fontSize: 16, fontWeight: '600', marginTop: 7}}>
+            <Text style={{ fontSize: 16, fontWeight: '600', marginTop: 7 }}>
               Pay on delivery (Cash)
             </Text>
           </View>
@@ -594,4 +593,14 @@ const ConfirmationScreen = () => {
 
 export default ConfirmationScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  buyNowButton: {
+    backgroundColor: '#FFAC1C',
+    padding: 10,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    marginVertical: 10,
+  },
+});

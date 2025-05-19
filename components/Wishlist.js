@@ -64,8 +64,8 @@ const Wishlist = () => {
   <View style={styles.card}>
     <Image source={{ uri: item.image }} style={styles.image} />
     <View style={{ flex: 1, marginLeft: 10 }}>
-      <Text style={styles.title}>{item.name}</Text>
-      <Text style={styles.description}>RAM: {item.description}</Text>
+      <Text style={styles.title}>{item.name || item.title}</Text>
+      <Text style={styles.description}>Description: {item.description}</Text>
       <Text style={styles.color}>Color: {item.color}</Text>
       <Text style={styles.price}>₹{item.price}</Text>
 
@@ -104,7 +104,7 @@ const Wishlist = () => {
   return (
     <FlatList
       data={wishlist}
-      keyExtractor={item => item.id.toString()}
+      keyExtractor={item => (item.id || item._id).toString()}
       renderItem={renderItem}
       contentContainerStyle={{padding: 10}}
     />

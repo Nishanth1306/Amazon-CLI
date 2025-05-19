@@ -1,6 +1,6 @@
 
 const config = {
-    API_URL: "http://192.168.118.180:3000"
+    API_URL: "http://192.168.0.134:3000"
 };
 
 

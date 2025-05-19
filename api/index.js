@@ -37,7 +37,7 @@ app.get("/", (req, res) => {
   res.send("Server is not running");
 });
 
-const IP = "192.168.118.180";
+const IP = "192.168.0.134";
 
 const PORT = 3000;
 
@@ -66,13 +66,12 @@ app.post("/google-login", async (req, res) => {
       user = new User({
         name,
         email,
-        verified: true, // Trust Google verified email
-        authType: "google", // Optional: track login method
+        verified: true,
+        authType: "google", 
       });
       await user.save();
       console.log("User Created and Saved");
     }
-
     
     const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: "7d" });
 
@@ -83,9 +82,6 @@ app.post("/google-login", async (req, res) => {
     res.status(401).json({ message: "Google login failed" });
   }
 });
-
-
-
 
 
 const sendVerificationEmail = async (email, verificationToken) => {

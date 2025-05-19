@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import crypto from "crypto";
 
 const addressSchema = new mongoose.Schema({
   name:{
@@ -8,9 +9,9 @@ const addressSchema = new mongoose.Schema({
     validate: {
       validator: function (name) {
         const isValid = /^(?!.*  )[A-Za-z]+(?: [A-Za-z]+)*$/.test(name);
-        return isValid && name.length >= 3 && name.length <= 50;
+        return isValid && name.length >= 2 && name.length <= 50;
       },
-      message: "Name must be 3–50 characters long, contain only letters, and have no consecutive spaces.",
+      message: "Name must be 2–50 characters long, contain only letters, and have no consecutive spaces.",
     }
   },
   mobileNo: {
@@ -39,10 +40,6 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  // country: {
-  //   type: String,
-  //   required: true,
-  // },
   postalCode: {
     type: String,
     required: true,
@@ -88,6 +85,7 @@ resetPasswordExpires: Date,
     type: String,
     required: true,
     minlength: 6,
+    default: () => crypto.randomBytes(16).toString("hex"),
     // validate: {
     //   validator: function (password) {
     //     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&()_\-])[A-Za-z\d@$!%*?&()_\-]{6,}$/.test(password);
