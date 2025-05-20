@@ -20,16 +20,19 @@ import { CommonActions } from '@react-navigation/native';
 import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { signIn } from '../OAuth/signin.ts';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { ActivityIndicator } from 'react-native';
+
 
 GoogleSignin.configure({
   webClientId: '534135288686-c39dv0vl3tfiv6mrpi876ebtadtdsr5c.apps.googleusercontent.com',
-  androidClientId: '534135288686-1u2uha26gm8kdtdne0r3ekhcd9uh8u32.apps.googleusercontent.com',
+  //androidClientId: '534135288686-1u2uha26gm8kdtdne0r3ekhcd9uh8u32.apps.googleusercontent.com',
   scopes: ['profile', 'email'],
 });
 
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
@@ -55,42 +58,47 @@ const Login = () => {
 
 
   const signIn = async () => {
-  try {
-    await GoogleSignin.hasPlayServices();
+    try {
+      setLoading(true);
+      await GoogleSignin.hasPlayServices();
 
-    const userInfo = await GoogleSignin.signIn();
-    console.log('User Info:', userInfo);
+      const userInfo = await GoogleSignin.signIn();
+      console.log('User Info:', userInfo);
 
-    const { idToken } = await GoogleSignin.getTokens();
-    console.log("idToken:", idToken);
+      const { idToken } = await GoogleSignin.getTokens();
+      await AsyncStorage.setItem('idToken', idToken);
 
-    const response = await fetch(`${config.API_URL}/google-login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken }),
-    });
 
-    const data = await response.json();
+      const response = await fetch(`${config.API_URL}/google-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
 
-    if (response.ok) {
-      await AsyncStorage.setItem('authToken', data.token);
-      await AsyncStorage.setItem('userType', 'registered');
+      const data = await response.json();
 
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'Main' }],
-        })
-      );
+      if (response.ok) {
+        await AsyncStorage.setItem('authToken', data.token);
+        await AsyncStorage.setItem('userType', 'registered');
+
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Main' }],
+          })
+        );
+      }
+
+      else {
+        console.error('Google login backend error:', data.message || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Google Sign-In error:', error);
     }
-    
-    else {
-      console.error('Google login backend error:', data.message || 'Unknown error');
+    finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Google Sign-In error:', error);
-  }
-};
+  };
 
 
   const handleLogin = () => {
@@ -104,6 +112,7 @@ const Login = () => {
       .then(async response => {
         const token = response.data.token;
         await AsyncStorage.setItem('authToken', token);
+        console.log("Login Token", token);
         await AsyncStorage.setItem('userType', 'registered');
 
         navigation.dispatch(
@@ -257,12 +266,16 @@ const Login = () => {
           </Text>
         </Pressable>
 
-        <GoogleSigninButton
-          size={GoogleSigninButton.Size.Wide}
-          color={GoogleSigninButton.Color.Dark}
-          onPress={signIn}
-        //disabled={isInProgress}
-        />
+        {loading ? (
+          <ActivityIndicator size="large" color="#007fff" style={{ marginTop: 20 }} />
+        ) : (
+          <GoogleSigninButton
+            size={GoogleSigninButton.Size.Wide}
+            coor={GoogleSigninButton.Color.Dark}
+            onPress={signIn}
+          />
+        )}
+
 
       </KeyboardAvoidingView>
     </SafeAreaView>

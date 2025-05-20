@@ -136,33 +136,6 @@ const CartScreen = () => {
     setLoading(false);
   }
 };
-
-// const handleSaveForLater = async (item) => {
-//   try {
-//     console.log('Saving item:', item);
-//     const response = await axios.post(`${config.API_URL}/user/${userId}/wishlist`, {
-//       name: item.title || item.name || 'No Title',
-//       id: item.id,
-//       description: item.size || '',
-//       price: item.price,
-//       color: item.color || '',
-//       image: item.carouselImages?.[0] || item.image || '',
-//     });
-//     dispatch(addToWish(item));
-//     dispatch(removeFromCart(item));
-//     console.log('Item dispatched to wishlist');
-
-//     console.log('Save for later response:', response.status, response.data);
-//   } catch (error) {
-//     console.error('Error saving item to wishlist:', error?.response?.data || error.message);
-//     Alert.alert('Error', 'Failed to move product');
-//   }
-// };
-
-// useEffect(()=>{
-//   handleSaveForLater()
-// },[])
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -295,12 +268,11 @@ const CartScreen = () => {
             </View>
           ))
         )}
-
+      </ScrollView>
         <>
           <Text style={styles.sectionTitle}>Your Wishlist</Text>
           <Wishlist />
         </>
-      </ScrollView>
     </SafeAreaView>
   );
 };

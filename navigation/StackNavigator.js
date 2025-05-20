@@ -1,5 +1,5 @@
-import {StyleSheet} from 'react-native';
-import React from 'react';
+import {StyleSheet,View,ActivityIndicator} from 'react-native';
+import React,{useState,useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -31,9 +31,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AutoAddressForm from '../screens/AutoAddressForm';
 import AutoPinScreen from '../screens/AutoPinScreen';
 import OrdersScreen from '../screens/OrdersScreen';
-
-
 import { Linking } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const Stack = createNativeStackNavigator();
@@ -109,18 +108,59 @@ function BottomTabs() {
 }
 
 const StackNavigator = () => {
+  const [initialRoute, setInitialRoute] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const token = await AsyncStorage.getItem('authToken');
+        console.log(token);
+        setInitialRoute(token ? 'Main' : 'Landing');
+      } catch (error) {
+        console.error('Error reading authToken from storage', error);
+        setInitialRoute('Landing');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    checkUser();
+  }, []);
+
   const linking = {
     prefixes: ['amazon://'],
     config: {
       screens: {
         Home: 'home',
-        OrdersScreen: 'orders/:userId', 
+        OrdersScreen: {
+          path: 'orders/:userId',
+          parse: {
+            userId: (userId) => `${userId}`,
+          },
+        },
       },
     },
   };
+
+  if (isLoading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color="#008E97" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer linking={linking}>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName={initialRoute}>
+
+        <Stack.Screen
+          name="Landing"
+          component={LandingPage}
+          options={{headerShown: false}}
+        />
+
         <Stack.Screen
           name="Login"
           component={Login}
@@ -228,11 +268,7 @@ const StackNavigator = () => {
           options={{headerShown: false}}
         />
 
-        <Stack.Screen
-          name="Landing"
-          component={LandingPage}
-          options={{headerShown: false}}
-        />
+      
 
         <Stack.Screen
           name="Order"

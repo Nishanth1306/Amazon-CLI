@@ -17,6 +17,8 @@ import config from '../src/config.js';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
 
 const UserProfile = () => {
   const [loading, setLoading] = useState(true);
@@ -73,11 +75,25 @@ const UserProfile = () => {
       await AsyncStorage.removeItem('authToken');
       setUserId(null);
       navigation.replace('Login');
+      const idToken = await AsyncStorage.getItem('idToken');
+      if(idToken){
+        signOut();
+      }
     } catch (error) {
       console.log('Logout error:', error);
       Alert.alert('Error', 'Failed to logout');
     }
+
   };
+  const signOut = async () => {
+  try {
+    await GoogleSignin.signOut();
+    console.log('User signed out successfully');
+  } catch (error) {
+    console.error('Error signing out:', error);
+  }
+};
+
 
   const renderOrderItems = () => {
     if (loading) {

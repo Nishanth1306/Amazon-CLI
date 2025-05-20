@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -6,18 +6,48 @@ import {
   StyleSheet,
   Image,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LandingPage = () => {
   const navigation = useNavigation();
+  const [loading, setLoading] = React.useState(true);
 
-  const handleSkipLogin = async () =>{
-      
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const userId = await AsyncStorage.getItem("userId");
+        if (userId) {
+          console.log("USer Found");
+          navigation.replace("Home");
+        } else {
+          console.log("USer Not Found");
+         
+          setLoading(false);
+        }
+      } catch (error) {
+        console.log("Error reading userId from AsyncStorage:", error);
+        setLoading(false);
+      }
+    };
+
+    checkUser();
+  }, [navigation]);
+
+  const handleSkipLogin = async () => {
     await AsyncStorage.setItem("userType", "guest");
     navigation.replace("Main");
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#febe10" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -53,6 +83,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 20,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
   logo: {
     width: 160,
     height: 100,
@@ -83,3 +119,4 @@ const styles = StyleSheet.create({
 });
 
 export default LandingPage;
+
