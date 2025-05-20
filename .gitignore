@@ -76,3 +76,4 @@ yarn-error.log
 
 echo "api/clone-cf5b3-firebase-adminsdk-fbsvc-5c8aa3da99.json" >> .gitignore
 echo "api/clone-cf5b3-firebase-adminsdk-fbsvc-cc6e666626.json" >> .gitignore
+api/clone-cf5b3-firebase-adminsdk-fbsvc-cc6e666626.json
